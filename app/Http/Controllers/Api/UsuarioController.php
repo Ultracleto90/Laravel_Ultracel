@@ -62,4 +62,27 @@ class UsuarioController extends Controller
         }
         return response()->json(['status' => false, 'message' => 'Usuario no encontrado'], 404);
     }
+    public function login(Request $request)
+    {
+        // Buscamos al usuario por su email
+        $user = User::where('email', $request->email)->first();
+
+        // Verificamos si existe y si la contraseña coincide
+        if (!$user || !\Hash::check($request->password, $user->password)) {
+            return response()->json(['status' => false, 'message' => 'Credenciales incorrectas'], 401);
+        }
+
+        // Verificamos si el dueño no lo ha despedido/deshabilitado
+        if ($user->permitido == 0) {
+            return response()->json(['status' => false, 'message' => 'Usuario deshabilitado'], 403);
+        }
+
+        // Si todo está bien, le damos luz verde y le decimos su rol
+        return response()->json([
+            'status' => true,
+            'rol' => $user->rol,
+            'name' => $user->name,
+            'taller_id' => $user->taller_id
+        ], 200);
+    }
 }

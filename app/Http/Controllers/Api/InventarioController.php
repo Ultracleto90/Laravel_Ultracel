@@ -101,4 +101,50 @@ class InventarioController extends Controller
              return response()->json(['status' => false, 'message' => 'No se pudo eliminar el producto.'], 500);
          }
     }
+    // --- CREAR NUEVO PRODUCTO ---
+    public function crearProducto(Request $request)
+    {
+        // 1. Verificamos que el SKU no esté repetido en el mismo taller
+        $existe = DB::table('inventario')
+            ->where('sku', $request->sku)
+            ->where('taller_id', $request->taller_id)
+            ->first();
+
+        if ($existe) {
+            return response()->json(['status' => false, 'message' => 'Ese SKU ya está registrado en el inventario.'], 400);
+        }
+
+        // 2. Lo guardamos en la base de datos
+        DB::table('inventario')->insert([
+            'taller_id' => $request->taller_id,
+            'sku' => $request->sku,
+            'nombre_producto' => $request->nombre_producto,
+            'tipo_producto' => $request->tipo_producto, // Aquí llega "Refacción" o "Venta Directa"
+            'marca_compatible' => $request->marca_compatible,
+            'stock' => $request->stock,
+            'precio_venta' => $request->precio_venta,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'Producto agregado con éxito.']);
+    }
+
+    // --- ACTUALIZAR PRODUCTO EXISTENTE ---
+    public function actualizarProducto(Request $request)
+    {
+        DB::table('inventario')
+            ->where('sku', $request->sku)
+            ->where('taller_id', $request->taller_id)
+            ->update([
+                'nombre_producto' => $request->nombre_producto,
+                'tipo_producto' => $request->tipo_producto,
+                'marca_compatible' => $request->marca_compatible,
+                'stock' => $request->stock,
+                'precio_venta' => $request->precio_venta,
+                'updated_at' => now(),
+            ]);
+
+        return response()->json(['status' => true, 'message' => 'Producto actualizado correctamente.']);
+    }
 }

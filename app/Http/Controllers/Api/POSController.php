@@ -43,14 +43,22 @@ class POSController extends Controller
     // 2. Cargar reparaciones terminadas de un cliente
     public function reparacionesPorCliente(Request $request)
     {
-        $reparaciones = DB::table('reparaciones as r')
-            ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
-            ->where('e.id_cliente', $request->id_cliente)
-            ->where('r.estado', 'Reparado')
-            ->select('r.id_reparacion', DB::raw("CONCAT(e.marca, ' ', e.modelo) as equipo"), 'r.presupuesto')
+        $reparaciones = DB::table('reparaciones')
+            ->join('equipos', 'reparaciones.id_equipo', '=', 'equipos.id_equipo')
+            ->where('equipos.id_cliente', $request->id_cliente)
+            ->where('reparaciones.taller_id', $request->taller_id ?? 1)
+            ->where('reparaciones.estado', 'Reparado')
+            ->select(
+                'reparaciones.id_reparacion',
+                DB::raw("CONCAT(equipos.marca, ' ', equipos.modelo) as equipo"),
+                'reparaciones.presupuesto'
+            )
             ->get();
 
-        return response()->json(['status' => true, 'reparaciones' => $reparaciones]);
+        return response()->json([
+            'status' => true,
+            'reparaciones' => $reparaciones
+        ]);
     }
 
     // 3. ¡El Motor de Ventas! Cobra, descuenta stock y actualiza reparaciones
@@ -112,4 +120,5 @@ class POSController extends Controller
             ->select('cantidad', 'descripcion_linea', 'precio_unitario')->get();
         return response()->json(['status' => true, 'detalles' => $detalles]);
     }
+    
 }

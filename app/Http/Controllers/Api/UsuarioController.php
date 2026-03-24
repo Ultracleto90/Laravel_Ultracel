@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
+use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -50,16 +50,26 @@ class UsuarioController extends Controller
     public function actualizarEmpleado(Request $request)
     {
         $empleado = User::find($request->id);
+        
         if ($empleado) {
             $empleado->name = $request->name;
             $empleado->email = $request->email;
             $empleado->rol = $request->rol;
             $empleado->especialidad = $request->especialidad ?? '';
             $empleado->permitido = $request->permitido;
+            
+            // --- NUEVA LÓGICA DE CONTRASEÑA ---
+            // 'filled' verifica que el campo exista y no esté vacío
+            if ($request->filled('password')) {
+                $empleado->password = Hash::make($request->password);
+            }
+            // ----------------------------------
+
             $empleado->save();
             
             return response()->json(['status' => true, 'message' => 'Usuario actualizado']);
         }
+        
         return response()->json(['status' => false, 'message' => 'Usuario no encontrado'], 404);
     }
     public function login(Request $request)

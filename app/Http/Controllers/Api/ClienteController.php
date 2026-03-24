@@ -77,21 +77,35 @@ class ClienteController extends Controller
     {
         DB::beginTransaction();
         try {
-            // 1. Buscar o crear cliente
-            $cliente = DB::table('clientes')->where('telefono', $request->cliente['telefono'])->where('taller_id', $request->taller_id)->first();
-            
-            if ($cliente) {
-                $id_cliente = $cliente->id_cliente;
-            } else {
-                $id_cliente = DB::table('clientes')->insertGetId([
-                    'taller_id' => $request->taller_id,
-                    'nombre' => $request->cliente['nombre'],
-                    'apellidos' => $request->cliente['apellidos'],
-                    'telefono' => $request->cliente['telefono'],
-                    'email' => $request->cliente['email'] ?? null,
-                    'created_at' => now(),
-                    'updated_at' => now()
-                ]);
+            // 1. Determinar el ID del cliente
+            $id_cliente = $request->id_cliente ?? null;
+
+            // Si no viene un ID explícito, significa que es un cliente nuevo (desde los campos de texto)
+            if (!$id_cliente && $request->has('cliente')) {
+                // Por seguridad extra, verificamos si el teléfono ya existe en el taller
+                $clienteExistente = DB::table('clientes')
+                    ->where('telefono', $request->cliente['telefono'])
+                    ->where('taller_id', $request->taller_id)
+                    ->first();
+                
+                if ($clienteExistente) {
+                    $id_cliente = $clienteExistente->id_cliente;
+                } else {
+                    $id_cliente = DB::table('clientes')->insertGetId([
+                        'taller_id' => $request->taller_id,
+                        'nombre' => $request->cliente['nombre'],
+                        'apellidos' => $request->cliente['apellidos'],
+                        'telefono' => $request->cliente['telefono'],
+                        'email' => $request->cliente['email'] ?? null,
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+            }
+
+            // Si por alguna extraña razón no tenemos ID en este punto, abortamos la misión
+            if (!$id_cliente) {
+                throw new \Exception('No se pudo determinar el cliente para este equipo.');
             }
 
             // 2. Insertar equipo
@@ -100,7 +114,7 @@ class ClienteController extends Controller
                 'tipo_equipo' => 'Celular', // Fijo como en el script original
                 'marca' => $request->equipo['marca'],
                 'modelo' => $request->equipo['modelo'],
-                'imei_o_serie' => $request->equipo['imei'],
+                'imei_o_serie' => $request->equipo['imei'] ?? null, // Por si el IMEI viene vacío
                 'created_at' => now()
             ]);
 

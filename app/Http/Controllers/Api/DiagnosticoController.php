@@ -75,4 +75,19 @@ class DiagnosticoController extends Controller
             return response()->json(['status' => false, 'message' => 'Error al guardar el diagnóstico: ' . $e->getMessage()], 500);
         }
     }
+    public function inventarioParaDiagnostico(Request $request)
+    {
+        $inventario = DB::table('inventario')
+            ->where('taller_id', $request->taller_id)
+            ->where('stock', '>', 0)
+            // Ya no hace falta el "id as id_producto", porque la columna ya se llama así
+            ->select('id_producto', 'nombre_producto', 'stock', 'precio_venta') 
+            ->orderBy('nombre_producto', 'asc')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'inventario' => $inventario
+        ]);
+    }
 }

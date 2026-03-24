@@ -11,16 +11,18 @@ class ReparacionController extends Controller
     // 1. Función para listar las reparaciones pendientes del taller
     public function pendientes(Request $request)
     {
-        $request->validate([
-            'taller_id' => 'required|integer'
-        ]);
-
-        $reparaciones = DB::table('reparaciones as r')
-            ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
-            ->where('r.taller_id', $request->taller_id)
-            ->whereIn('r.estado', ['Recibido', 'En Diagnóstico'])
-            ->select('r.id_reparacion', DB::raw("CONCAT(e.marca, ' ', e.modelo) AS dispositivo"), 'r.problema_reportado')
-            ->orderBy('r.fecha_recepcion', 'asc')
+        // Traemos todas las reparaciones del taller que NO hayan sido entregadas al cliente
+        $reparaciones = DB::table('reparaciones')
+            ->join('equipos', 'reparaciones.id_equipo', '=', 'equipos.id_equipo')
+            ->where('reparaciones.taller_id', $request->taller_id)
+            ->whereNotIn('reparaciones.estado', ['Entregado']) // Solo ocultamos los que ya se fueron
+            ->select(
+                'reparaciones.id_reparacion',
+                DB::raw("CONCAT(equipos.marca, ' ', equipos.modelo) as dispositivo"),
+                'reparaciones.estado', // <-- ¡El campo clave para los colores!
+                'reparaciones.problema_reportado'
+            )
+            ->orderBy('reparaciones.fecha_recepcion', 'desc')
             ->get();
 
         return response()->json([

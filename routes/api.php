@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\SolicitudMaterialController;
 use App\Http\Controllers\Api\POSController;
 use App\Http\Controllers\Api\ClienteController;
 
+
 // La ruta que escucha a Python
 Route::post('/login', [AuthController::class, 'login']);
 //Ruta insana de activacion de licencias
@@ -45,3 +46,14 @@ Route::post('/inventario/eliminar', [InventarioController::class, 'eliminarProdu
 Route::post('/clientes/historial', [ClienteController::class, 'historialReparaciones']);
 Route::post('/material/admin-listar', [SolicitudMaterialController::class, 'listarAdmin']);
 Route::post('/material/actualizar-estado', [SolicitudMaterialController::class, 'actualizarEstado']);
+Route::post('/diagnostico/inventario', [DiagnosticoController::class, 'inventarioParaDiagnostico']);
+Route::post('/inventario/crear', [InventarioController::class, 'crearProducto']);
+Route::post('/inventario/actualizar', [InventarioController::class, 'actualizarProducto']);
+Route::post('/pos/buscar-productos', [POSController::class, 'buscarProductos']);
+Route::post('/pos/reparaciones-cliente', [POSController::class, 'reparacionesPorCliente']);
+
+
+// Estas son vitales para tu motor de ventas y el historial:
+Route::post('/pos/procesar-venta', [POSController::class, 'procesarVenta']);
+Route::post('/pos/historial-ventas', [POSController::class, 'historialVentas']);
+Route::post('/pos/detalles-venta', [POSController::class, 'detallesVenta']);

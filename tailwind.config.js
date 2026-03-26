@@ -11,8 +11,15 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                'azul-oscuro': '#005187',
+                'azul-medio': '#4d82bc',
+                'azul-claro': '#84b6f4',
+                'azul-muy-claro': '#c4dafa',
+                'blanco-azulado': '#fcffff',
+            },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Readex Pro', ...defaultTheme.fontFamily.sans],
             },
         },
     },

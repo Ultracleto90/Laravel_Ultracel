@@ -28,4 +28,36 @@ class ReparacionController extends Controller
             'reparaciones' => $reparaciones
         ]);
     }
+
+    public function detalles(Request $request)
+    {
+        // Exigimos que la app nos mande el 'id_reparacion' (el folio)
+        $request->validate([
+            'id_reparacion' => 'required|integer'
+        ]);
+
+        $reparacion = DB::table('reparaciones as r')
+            ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
+            ->where('r.id_reparacion', $request->id_reparacion)
+            ->select(
+                'r.id_reparacion', 
+                'r.estado', 
+                'r.problema_reportado',
+                'r.costo_estimado', // Cambia esto si tu columna de precio se llama diferente
+                DB::raw("CONCAT(e.marca, ' ', e.modelo) AS dispositivo")
+            )
+            ->first();
+
+        if (!$reparacion) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No encontramos ninguna reparación con ese folio.'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $reparacion
+        ], 200);
+    }
 }

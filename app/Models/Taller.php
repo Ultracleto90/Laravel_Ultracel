@@ -11,12 +11,15 @@ class Taller extends Model
 
     protected $table = 'talleres';
 
+    // ¡Aquí agregamos los nuevos campos para que Laravel nos deje guardarlos!
     protected $fillable = [
         'plan_id',
         'nombre_negocio',
         'rfc_tax_id',
         'configuracion',
         'fecha_vencimiento_licencia',
+        'estado_licencia', // <-- NUEVO
+        'token_licencia',  // <-- NUEVO
         'activo',
     ];
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; // <-- ¡Este es vital para hacer las consultas!
+use Illuminate\Support\Facades\DB; 
 
 class ReparacionController extends Controller
 {
@@ -13,16 +13,16 @@ class ReparacionController extends Controller
     {
         // Traemos todas las reparaciones del taller que NO hayan sido entregadas al cliente
         $reparaciones = DB::table('reparaciones')
-            ->join('equipos', 'reparaciones.id_equipo', '=', 'equipos.id_equipo')
+            ->join('equipos', 'reparaciones.equipo_id', '=', 'equipos.id')
             ->where('reparaciones.taller_id', $request->taller_id)
-            ->whereNotIn('reparaciones.estado', ['Entregado']) // Solo ocultamos los que ya se fueron
+            ->whereNotIn('reparaciones.estado', ['entregado', 'cancelado']) // Usando los valores ENUM correctos de tu DB
             ->select(
-                'reparaciones.id_reparacion',
+                'reparaciones.id', // Llave primaria de la reparación
                 DB::raw("CONCAT(equipos.marca, ' ', equipos.modelo) as dispositivo"),
-                'reparaciones.estado', // <-- ¡El campo clave para los colores!
-                'reparaciones.problema_reportado'
+                'reparaciones.estado',
+                'reparaciones.falla_reportada' // Ajustado al nombre real de la columna
             )
-            ->orderBy('reparaciones.fecha_recepcion', 'desc')
+            ->orderBy('reparaciones.created_at', 'desc') // Usamos created_at porque fecha_recepcion no existe en tu esquema
             ->get();
 
         return response()->json([
@@ -32,20 +32,34 @@ class ReparacionController extends Controller
     }
 
     // 2. Obtener todos los detalles de una reparación específica para el Modal
+    // 2. Obtener todos los detalles de una reparación específica para el Modal y Ticket
     public function detalles(Request $request)
     {
         $detalles = DB::table('reparaciones as r')
-            ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
-            ->join('clientes as c', 'e.id_cliente', '=', 'c.id_cliente')
-            ->leftJoin('users as u', 'r.id_tecnico_asignado', '=', 'u.id')
-            ->where('r.id_reparacion', $request->id_reparacion)
+            ->join('equipos as e', 'r.equipo_id', '=', 'e.id')
+            ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
+            ->leftJoin('users as u', 'r.tecnico_id', '=', 'u.id')
+            ->where('r.id', $request->reparacion_id) // Asumiendo que Python manda ?reparacion_id=X
             ->select(
-                'e.marca', 'e.modelo', 'e.tipo_equipo', 'e.imei_o_serie', 'e.clave_acceso',
-                'c.nombre', 'c.apellidos', 'c.telefono',
-                'r.problema_reportado', 'r.estado',
+                'r.id', // <--- ¡Faltaba este para el número de folio del ticket!
+                'r.taller_id', // <--- ¡El pase VIP para la tiendita!
+                'e.marca', 
+                'e.modelo', 
+                'e.tipo', 
+                'e.imei_serie', 
+                'e.contrasena_desbloqueo', 
+                'c.nombre as cliente_nombre', 
+                'c.telefono',
+                'r.falla_reportada', 
+                'r.estado',
+                'r.diagnostico_tecnico', 
                 'u.name as tecnico_asignado'
             )
             ->first();
+
+        if (!$detalles) {
+            return response()->json(['status' => false, 'message' => 'Reparación no encontrada'], 404);
+        }
 
         return response()->json(['status' => true, 'detalles' => $detalles]);
     }
@@ -53,9 +67,17 @@ class ReparacionController extends Controller
     // 3. El botón para marcar la reparación como terminada
     public function terminar(Request $request)
     {
-        DB::table('reparaciones')->where('id_reparacion', $request->id_reparacion)
-            ->update(['estado' => 'Reparado', 'fecha_entrega_real' => now()]);
+        $actualizado = DB::table('reparaciones')
+            ->where('id', $request->reparacion_id)
+            ->update([
+                'estado' => 'listo', // Tu ENUM no tiene 'Reparado', tiene 'listo'
+                'fecha_entrega_real' => now()
+            ]);
 
-        return response()->json(['status' => true]);
+        if ($actualizado) {
+            return response()->json(['status' => true, 'message' => 'Equipo marcado como listo para entrega.']);
+        }
+
+        return response()->json(['status' => false, 'message' => 'No se pudo actualizar la reparación.'], 400);
     }
 }

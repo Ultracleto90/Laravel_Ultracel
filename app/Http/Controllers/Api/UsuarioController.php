@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -8,7 +9,7 @@ use App\Models\User;
 
 class UsuarioController extends Controller
 {
-    // Función original: Listar todos los empleados del taller
+    // Listar todos los empleados del taller
     public function listarEmpleados(Request $request)
     {
         $request->validate([
@@ -26,20 +27,34 @@ class UsuarioController extends Controller
     // 1. Ver un solo empleado para el Modal de Edición
     public function verEmpleado(Request $request)
     {
-        $empleado = User::find($request->id);
+        // 🔒 CANDADO: Solo si pertenece al taller que lo solicita
+        $empleado = User::where('id', $request->id)
+                        ->where('taller_id', $request->taller_id)
+                        ->first();
+
+        if (!$empleado) {
+            return response()->json(['status' => false, 'message' => 'Usuario no encontrado en este taller'], 404);
+        }
+
         return response()->json(['status' => true, 'empleado' => $empleado]);
     }
 
     // 2. Crear un nuevo empleado
     public function crearEmpleado(Request $request)
     {
+        // Validación básica para evitar choques de emails
+        $existe = User::where('email', $request->email)->first();
+        if ($existe) {
+            return response()->json(['status' => false, 'message' => 'Este correo ya está registrado'], 400);
+        }
+
         $nuevo = new User();
         $nuevo->name = $request->name;
         $nuevo->email = $request->email;
-        $nuevo->password = bcrypt($request->password); 
+        $nuevo->password = Hash::make($request->password); 
         $nuevo->rol = $request->rol;
         $nuevo->especialidad = $request->especialidad ?? 'General';
-        $nuevo->taller_id = $request->taller_id;
+        $nuevo->taller_id = $request->taller_id; // 🔒 SE ASIGNA AL TALLER CORRECTO
         $nuevo->permitido = 1;
         $nuevo->save();
 
@@ -49,7 +64,10 @@ class UsuarioController extends Controller
     // 3. Actualizar datos de un empleado
     public function actualizarEmpleado(Request $request)
     {
-        $empleado = User::find($request->id);
+        // 🔒 CANDADO: El usuario debe existir Y pertenecer al taller
+        $empleado = User::where('id', $request->id)
+                        ->where('taller_id', $request->taller_id)
+                        ->first();
         
         if ($empleado) {
             $empleado->name = $request->name;
@@ -58,36 +76,32 @@ class UsuarioController extends Controller
             $empleado->especialidad = $request->especialidad ?? '';
             $empleado->permitido = $request->permitido;
             
-            // --- NUEVA LÓGICA DE CONTRASEÑA ---
-            // 'filled' verifica que el campo exista y no esté vacío
+            // Si mandan contraseña nueva, se encripta y se guarda
             if ($request->filled('password')) {
                 $empleado->password = Hash::make($request->password);
             }
-            // ----------------------------------
 
             $empleado->save();
             
             return response()->json(['status' => true, 'message' => 'Usuario actualizado']);
         }
         
-        return response()->json(['status' => false, 'message' => 'Usuario no encontrado'], 404);
+        return response()->json(['status' => false, 'message' => 'Usuario no encontrado en este taller'], 404);
     }
+
+    // Login (Este se mantiene igual ya que el email es el identificador único global)
     public function login(Request $request)
     {
-        // Buscamos al usuario por su email
         $user = User::where('email', $request->email)->first();
 
-        // Verificamos si existe y si la contraseña coincide
-        if (!$user || !\Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['status' => false, 'message' => 'Credenciales incorrectas'], 401);
         }
 
-        // Verificamos si el dueño no lo ha despedido/deshabilitado
         if ($user->permitido == 0) {
             return response()->json(['status' => false, 'message' => 'Usuario deshabilitado'], 403);
         }
 
-        // Si todo está bien, le damos luz verde y le decimos su rol
         return response()->json([
             'status' => true,
             'rol' => $user->rol,

@@ -14,7 +14,7 @@ class ReparacionController extends Controller
         // Traemos todas las reparaciones del taller que NO hayan sido entregadas al cliente
         $reparaciones = DB::table('reparaciones')
             ->join('equipos', 'reparaciones.equipo_id', '=', 'equipos.id')
-            ->where('reparaciones.taller_id', $request->taller_id)
+            ->where('reparaciones.taller_id', $request->taller_id) // 🔒 CANDADO OK (Ya lo tenías)
             ->whereNotIn('reparaciones.estado', ['entregado', 'cancelado']) // Usando los valores ENUM correctos de tu DB
             ->select(
                 'reparaciones.id', // Llave primaria de la reparación
@@ -31,7 +31,6 @@ class ReparacionController extends Controller
         ]);
     }
 
-    // 2. Obtener todos los detalles de una reparación específica para el Modal
     // 2. Obtener todos los detalles de una reparación específica para el Modal y Ticket
     public function detalles(Request $request)
     {
@@ -39,7 +38,8 @@ class ReparacionController extends Controller
             ->join('equipos as e', 'r.equipo_id', '=', 'e.id')
             ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
             ->leftJoin('users as u', 'r.tecnico_id', '=', 'u.id')
-            ->where('r.id', $request->reparacion_id) // Asumiendo que Python manda ?reparacion_id=X
+            ->where('r.taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO (Protege datos del cliente y contraseñas)
+            ->where('r.id', $request->reparacion_id) 
             ->select(
                 'r.id', // <--- ¡Faltaba este para el número de folio del ticket!
                 'r.taller_id', // <--- ¡El pase VIP para la tiendita!
@@ -58,7 +58,7 @@ class ReparacionController extends Controller
             ->first();
 
         if (!$detalles) {
-            return response()->json(['status' => false, 'message' => 'Reparación no encontrada'], 404);
+            return response()->json(['status' => false, 'message' => 'Reparación no encontrada o no pertenece a tu taller.'], 404);
         }
 
         return response()->json(['status' => true, 'detalles' => $detalles]);
@@ -68,6 +68,7 @@ class ReparacionController extends Controller
     public function terminar(Request $request)
     {
         $actualizado = DB::table('reparaciones')
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO (Evita modificar equipos ajenos)
             ->where('id', $request->reparacion_id)
             ->update([
                 'estado' => 'listo', // Tu ENUM no tiene 'Reparado', tiene 'listo'
@@ -78,6 +79,6 @@ class ReparacionController extends Controller
             return response()->json(['status' => true, 'message' => 'Equipo marcado como listo para entrega.']);
         }
 
-        return response()->json(['status' => false, 'message' => 'No se pudo actualizar la reparación.'], 400);
+        return response()->json(['status' => false, 'message' => 'No se pudo actualizar la reparación o no pertenece a este taller.'], 400);
     }
 }

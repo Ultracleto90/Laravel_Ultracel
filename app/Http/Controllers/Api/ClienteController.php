@@ -12,8 +12,10 @@ class ClienteController extends Controller
     public function obtenerCliente(Request $request)
     {
         $cliente = DB::table('clientes')
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD
             ->where('id_cliente', $request->id_cliente)
             ->first();
+            
         return response()->json(['status' => true, 'cliente' => $cliente]);
     }
 
@@ -30,13 +32,16 @@ class ClienteController extends Controller
         try {
             if ($request->id_cliente) {
                 // Actualizar
-                DB::table('clientes')->where('id_cliente', $request->id_cliente)->update([
-                    'nombre' => $request->nombre,
-                    'apellidos' => $request->apellidos,
-                    'telefono' => $request->telefono,
-                    'email' => $request->email,
-                    'updated_at' => now()
-                ]);
+                DB::table('clientes')
+                    ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD
+                    ->where('id_cliente', $request->id_cliente)
+                    ->update([
+                        'nombre' => $request->nombre,
+                        'apellidos' => $request->apellidos,
+                        'telefono' => $request->telefono,
+                        'email' => $request->email,
+                        'updated_at' => now()
+                    ]);
                 $mensaje = 'Cliente actualizado correctamente.';
             } else {
                 // Crear nuevo
@@ -65,7 +70,11 @@ class ClienteController extends Controller
     public function eliminarCliente(Request $request)
     {
          try {
-             DB::table('clientes')->where('id_cliente', $request->id_cliente)->delete();
+             DB::table('clientes')
+                 ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD
+                 ->where('id_cliente', $request->id_cliente)
+                 ->delete();
+                 
              return response()->json(['status' => true, 'message' => 'Cliente eliminado.']);
          } catch (\Exception $e) {
              return response()->json(['status' => false, 'message' => 'No se pudo eliminar el cliente.'], 500);
@@ -85,7 +94,7 @@ class ClienteController extends Controller
                 // Por seguridad extra, verificamos si el teléfono ya existe en el taller
                 $clienteExistente = DB::table('clientes')
                     ->where('telefono', $request->cliente['telefono'])
-                    ->where('taller_id', $request->taller_id)
+                    ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías excelente aquí)
                     ->first();
                 
                 if ($clienteExistente) {
@@ -134,11 +143,13 @@ class ClienteController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
-    // Obtener historial de reparaciones de un cliente
+    
+    // 5. Obtener historial de reparaciones de un cliente
     public function historialReparaciones(Request $request)
     {
         $historial = DB::table('reparaciones as r')
             ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
+            ->where('r.taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD
             ->where('e.id_cliente', $request->id_cliente)
             ->select('r.id_reparacion', DB::raw("DATE_FORMAT(r.fecha_recepcion, '%Y-%m-%d') as fecha"), DB::raw("CONCAT(e.marca, ' ', e.modelo) AS dispositivo"), 'r.estado', 'r.presupuesto')
             ->orderBy('r.fecha_recepcion', 'desc')

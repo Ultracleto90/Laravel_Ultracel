@@ -5,14 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Taller; // Importamos el modelo Taller
+use App\Models\Taller; 
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class LicenciaController extends Controller
 {
     public function activar(Request $request)
     {
-        // 1. Validar lo que nos manda Python
+        // 1. Validar lo que nos manda la App
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
@@ -30,36 +31,46 @@ class LicenciaController extends Controller
         }
 
         // 4. Verificar que sea el DUEÑO (Admin) el que intenta activar
-        if ($user->rol !== 'admin') {
+        // Importante: Asegúrate que en tu DB el rol se guarde exactamente como 'admin'
+        if (strtolower($user->rol) !== 'admin') {
             return response()->json([
                 'status' => false,
-                'message' => 'Solo el administrador del taller puede activar esta licencia.'
+                'message' => 'Acceso denegado. Solo el administrador puede activar la licencia.'
             ], 403);
         }
 
-        // 5. Verificar el estado de la licencia del Taller
+        // 5. Verificar que el usuario tenga un taller asignado
+        if (!$user->taller_id) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Este usuario no tiene un taller vinculado.'
+            ], 404);
+        }
+
+        // 6. Verificar el estado de la licencia del Taller
         $taller = Taller::find($user->taller_id);
-        $hoy = now()->format('Y-m-d');
+        $hoy = now();
 
-        if (!$taller || !$taller->activo || $taller->fecha_vencimiento_licencia < $hoy) {
+        if (!$taller || !$taller->activo || $taller->fecha_vencimiento_licencia < $hoy->format('Y-m-d')) {
             return response()->json([
                 'status' => false,
-                'message' => 'La licencia ha expirado o el taller está inactivo. Por favor renueva en la página web.'
+                'message' => 'Licencia vencida o taller inactivo. Contacta a soporte para renovar.'
             ], 403);
         }
 
-        // 6. ¡Todo en orden! Generamos un Token de acceso simulado por ahora
-        // (Más adelante lo cambiaremos por un Token criptográfico real con Laravel Sanctum)
-        $tokenGenerado = hash('sha256', $user->email . $taller->id . now());
+        // 7. Generamos un Token de sesión más robusto
+        // Usamos un random string para que cada activación genere un token único
+        $tokenGenerado = hash('sha256', $user->email . $taller->id . Str::random(10) . now());
 
         return response()->json([
             'status' => true,
-            'message' => '¡Licencia activada exitosamente!',
+            'message' => '¡Licencia verificada y activada!',
             'datos_licencia' => [
                 'taller_id' => $taller->id,
                 'nombre_negocio' => $taller->nombre_negocio,
                 'token_seguridad' => $tokenGenerado,
-                'vencimiento' => $taller->fecha_vencimiento_licencia
+                'vencimiento' => $taller->fecha_vencimiento_licencia,
+                'usuario' => $user->name
             ]
         ], 200);
     }

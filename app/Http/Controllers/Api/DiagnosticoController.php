@@ -14,7 +14,7 @@ class DiagnosticoController extends Controller
         $request->validate(['taller_id' => 'required|integer']);
 
         $inventario = DB::table('inventario')
-            ->where('taller_id', $request->taller_id)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO OK
             ->where('stock', '>', 0)
             ->select('id_producto', 'nombre_producto', 'stock', 'precio_venta')
             ->orderBy('nombre_producto', 'asc')
@@ -30,26 +30,39 @@ class DiagnosticoController extends Controller
     public function guardar(Request $request)
     {
         $request->validate([
+            'taller_id' => 'required|integer', // 🔒 VALIDACIÓN AÑADIDA
             'id_reparacion' => 'required|integer',
             'diagnostico' => 'required|string',
             'presupuesto' => 'required|numeric',
             'piezas' => 'required|array'
         ]);
 
-        // Iniciamos una transacción para que si algo falla, no se guarde a medias
+        // Iniciamos una transacción
         DB::beginTransaction();
 
         try {
-            // A) Actualizamos el estado de la reparación
+            // 🔒 VERIFICACIÓN DE PROPIEDAD:
+            // Validamos que la reparación pertenezca al taller antes de editar
+            $reparacion = DB::table('reparaciones')
+                ->where('id_reparacion', $request->id_reparacion)
+                ->where('taller_id', $request->taller_id)
+                ->first();
+
+            if (!$reparacion) {
+                return response()->json(['status' => false, 'message' => 'Reparación no encontrada o acceso denegado.'], 403);
+            }
+
+            // A) Actualizamos el estado de la reparación con el candado del taller
             DB::table('reparaciones')
                 ->where('id_reparacion', $request->id_reparacion)
+                ->where('taller_id', $request->taller_id) 
                 ->update([
                     'diagnostico_tecnico' => $request->diagnostico,
                     'presupuesto' => $request->presupuesto,
                     'estado' => 'Esperando Aprobación'
                 ]);
 
-            // B) Limpiamos piezas viejas por si acaso
+            // B) Limpiamos piezas viejas (Solo de esta reparación que ya validamos que es nuestra)
             DB::table('reparacion_piezas')
                 ->where('id_reparacion', $request->id_reparacion)
                 ->delete();
@@ -65,7 +78,9 @@ class DiagnosticoController extends Controller
                 ];
             }
             
-            DB::table('reparacion_piezas')->insert($piezasAInsertar);
+            if (!empty($piezasAInsertar)) {
+                DB::table('reparacion_piezas')->insert($piezasAInsertar);
+            }
 
             DB::commit();
             return response()->json(['status' => true, 'message' => 'Diagnóstico guardado correctamente.']);
@@ -75,12 +90,13 @@ class DiagnosticoController extends Controller
             return response()->json(['status' => false, 'message' => 'Error al guardar el diagnóstico: ' . $e->getMessage()], 500);
         }
     }
+
+    // 3. Inventario para diagnóstico (Misma lógica de seguridad)
     public function inventarioParaDiagnostico(Request $request)
     {
         $inventario = DB::table('inventario')
-            ->where('taller_id', $request->taller_id)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO OK
             ->where('stock', '>', 0)
-            // Ya no hace falta el "id as id_producto", porque la columna ya se llama así
             ->select('id_producto', 'nombre_producto', 'stock', 'precio_venta') 
             ->orderBy('nombre_producto', 'asc')
             ->get();

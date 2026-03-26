@@ -17,7 +17,7 @@ class InventarioController extends Controller
         $termino = $request->termino ?? '';
 
         $productos = DB::table('inventario')
-            ->where('taller_id', $request->taller_id)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO PERFECTO (Ya lo tenías)
             ->where(function($query) use ($termino) {
                 $query->where('nombre_producto', 'LIKE', "%{$termino}%")
                       ->orWhere('marca_compatible', 'LIKE', "%{$termino}%")
@@ -32,10 +32,15 @@ class InventarioController extends Controller
             'productos' => $productos
         ]);
     }
+    
     // Obtener un producto específico por ID (para rellenar el formulario de edición)
     public function obtenerProducto(Request $request)
     {
-        $producto = DB::table('inventario')->where('id_producto', $request->id_producto)->first();
+        $producto = DB::table('inventario')
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO
+            ->where('id_producto', $request->id_producto)
+            ->first();
+            
         return response()->json(['status' => true, 'producto' => $producto]);
     }
 
@@ -44,8 +49,9 @@ class InventarioController extends Controller
     {
         $producto = DB::table('inventario')
             ->where('sku', $request->sku)
-            ->where('taller_id', $request->taller_id)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías)
             ->first();
+            
         return response()->json(['status' => true, 'id_producto' => $producto ? $producto->id_producto : null]);
     }
 
@@ -75,7 +81,10 @@ class InventarioController extends Controller
             ];
 
             if ($request->id_producto) {
-                DB::table('inventario')->where('id_producto', $request->id_producto)->update($datos);
+                DB::table('inventario')
+                    ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO
+                    ->where('id_producto', $request->id_producto)
+                    ->update($datos);
                 $mensaje = 'Producto actualizado correctamente.';
             } else {
                 $datos['created_at'] = now();
@@ -95,19 +104,24 @@ class InventarioController extends Controller
     public function eliminarProducto(Request $request)
     {
          try {
-             DB::table('inventario')->where('sku', $request->sku)->where('taller_id', $request->taller_id)->delete();
+             DB::table('inventario')
+                 ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías, solo lo ordené)
+                 ->where('sku', $request->sku)
+                 ->delete();
+                 
              return response()->json(['status' => true, 'message' => 'Producto eliminado.']);
          } catch (\Exception $e) {
              return response()->json(['status' => false, 'message' => 'No se pudo eliminar el producto.'], 500);
          }
     }
+    
     // --- CREAR NUEVO PRODUCTO ---
     public function crearProducto(Request $request)
     {
         // 1. Verificamos que el SKU no esté repetido en el mismo taller
         $existe = DB::table('inventario')
             ->where('sku', $request->sku)
-            ->where('taller_id', $request->taller_id)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías)
             ->first();
 
         if ($existe) {
@@ -134,8 +148,8 @@ class InventarioController extends Controller
     public function actualizarProducto(Request $request)
     {
         DB::table('inventario')
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías, solo lo subí de orden)
             ->where('sku', $request->sku)
-            ->where('taller_id', $request->taller_id)
             ->update([
                 'nombre_producto' => $request->nombre_producto,
                 'tipo_producto' => $request->tipo_producto,

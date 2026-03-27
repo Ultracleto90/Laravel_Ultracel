@@ -11,7 +11,6 @@ class PortalClienteController extends Controller
     // Función exclusiva para que la App del Cliente rastree su equipo
     public function rastrear(Request $request)
     {
-        // El cliente solo ingresa su folio, no sabe qué taller es
         $request->validate([
             'reparacion_id' => 'required|integer'
         ]);
@@ -19,10 +18,10 @@ class PortalClienteController extends Controller
         $detalles = DB::table('reparaciones as r')
             ->join('equipos as e', 'r.equipo_id', '=', 'e.id')
             ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
-            ->where('r.id_reparacion', $request->reparacion_id) // Corrección de la columna aplicada
+            ->where('r.id_reparacion', $request->reparacion_id)
             ->select(
-                'r.id_reparacion as id', // Corrección aplicada
-                'r.taller_id', // ¡Le devolvemos el taller_id a tu compañero para que su app fluya!
+                'r.id_reparacion as id', 
+                'r.taller_id', 
                 'e.marca',
                 'e.modelo',
                 'c.nombre as cliente_nombre',
@@ -30,7 +29,6 @@ class PortalClienteController extends Controller
                 'r.falla_reportada',
                 'r.diagnostico_tecnico',
                 'r.presupuesto'
-                // Omitimos la contraseña de desbloqueo aquí por ser un portal público
             )
             ->first();
 
@@ -40,23 +38,27 @@ class PortalClienteController extends Controller
 
         return response()->json(['status' => true, 'detalles' => $detalles]);
     }
-    // Función para el Ticket: consultarTicket
+
+    // Función para el Ticket: consultarTicket (LA QUE USA LA APP MÓVIL)
     public function consultarTicket(Request $request)
     {
-        // 1. Validamos que Eduardo nos mande el folio en el JSON
+        // 1. Validamos que la app nos mande el folio en el JSON
         $request->validate([
-            'id_reparacion' => 'required|integer' // Este es el nombre del campo que Eduardo enviará
+            'id_reparacion' => 'required|integer' 
         ]);
 
         // 2. Buscamos el folio en toda la base de datos (SIN filtro de taller_id)
-        $ticket = \Illuminate\Support\Facades\DB::table('reparaciones as r')
+        $ticket = DB::table('reparaciones as r')
             ->join('equipos as e', 'r.equipo_id', '=', 'e.id')
             ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
-            ->join('talleres as t', 'r.taller_id', '=', 't.id') // Unimos con talleres para decirle en qué sucursal está
-            ->where('r.id', $request->id_reparacion) // Aquí usamos r.id porque así se llama tu columna en la DB
+            ->join('talleres as t', 'r.taller_id', '=', 't.id') 
+            // 🔥 CORRECCIÓN: Usamos id_reparacion para el WHERE
+            ->where('r.id_reparacion', $request->id_reparacion) 
             ->select(
-                'r.id as folio',
-                't.nombre_negocio as sucursal_asignada', // Le decimos en qué taller está su equipo
+                // 🔥 CORRECCIÓN: Usamos id_reparacion as folio
+                'r.id_reparacion as folio',
+                'r.taller_id', // Para que funcione la tiendita
+                't.nombre_negocio as sucursal_asignada', 
                 'e.marca',
                 'e.modelo',
                 'c.nombre as nombre_cliente',
@@ -64,7 +66,7 @@ class PortalClienteController extends Controller
                 'r.falla_reportada',
                 'r.diagnostico_tecnico',
                 'r.presupuesto',
-                \Illuminate\Support\Facades\DB::raw("DATE_FORMAT(r.created_at, '%Y-%m-%d') as fecha_ingreso")
+                DB::raw("DATE_FORMAT(r.created_at, '%Y-%m-%d') as fecha_ingreso")
             )
             ->first();
 
@@ -76,7 +78,7 @@ class PortalClienteController extends Controller
             ], 404);
         }
 
-        // 4. Si lo encuentra, le devolvemos los datos limpios a Eduardo
+        // 4. Si lo encuentra, lo devolvemos limpio
         return response()->json([
             'status' => true,
             'ticket' => $ticket

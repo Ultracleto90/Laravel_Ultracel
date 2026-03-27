@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DiagnosticoController;
 use App\Http\Controllers\Api\SolicitudMaterialController;
 use App\Http\Controllers\Api\POSController;
 use App\Http\Controllers\Api\ClienteController;
+use App\Http\Controllers\Api\PortalClienteController;
 
 
 // La ruta que escucha a Python
@@ -57,3 +58,7 @@ Route::post('/pos/reparaciones-cliente', [POSController::class, 'reparacionesPor
 Route::post('/pos/procesar-venta', [POSController::class, 'procesarVenta']);
 Route::post('/pos/historial-ventas', [POSController::class, 'historialVentas']);
 Route::post('/pos/detalles-venta', [POSController::class, 'detallesVenta']);
+
+//RUta para el portal del cliente (App móvil)
+Route::post('/portal/rastrear', [PortalClienteController::class, 'rastrear']);
+Route::post('/ticket/consultar', [\App\Http\Controllers\Api\PortalClienteController::class, 'consultarTicket']);

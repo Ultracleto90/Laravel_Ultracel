@@ -39,6 +39,9 @@
         
         // Mantenemos la lista de usuarios completa para la tabla de abajo
         $usuarios = \App\Models\User::where('taller_id', $taller_id)->get();
+
+
+
         // --- MODELO MATEMÁTICO: TRANSFORMADA DE LAPLACE ---
         // Ecuación diferencial de decaimiento del trabajo: dP/dt = -kP
         // Función de Transferencia en el dominio 's': P(s) = P(0) / (s + k)
@@ -101,17 +104,16 @@
                     </div>
                     <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-3xl shadow-inner">👥</div>
                 </div>
-                // --- CARD ESPECIAL: TRANSFORMADA DE LAPLACE ---
                 
+
                 <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 shadow-sm border border-gray-700 flex items-center justify-between hover:shadow-lg transition transform hover:-translate-y-1">
                     <div>
                         <p class="text-gray-400 text-xs font-bold mb-1 tracking-widest uppercase">Función de Transferencia</p>
                         <h3 class="text-xl font-mono font-extrabold text-green-400 mb-1">{{ $funcionLaplace }}</h3>
                         <p class="text-[10px] text-gray-500 font-mono">ℒ{dP/dt = -kP} | k={{ $k }}</p>
                     </div>
-                    <div class="w-12 h-12 bg-gray-800 text-green-400 border border-green-500/30 rounded-xl flex items-center justify-center text-2xl shadow-inner">ℒ</div>
+                    <div class="flex-shrink-0 w-14 h-14 bg-gray-800 text-green-400 border border-green-500/30 rounded-xl flex items-center justify-center text-3xl shadow-inner">ℒ</div>
                 </div>
-            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 

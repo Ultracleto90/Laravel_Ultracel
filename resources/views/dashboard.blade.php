@@ -103,17 +103,18 @@
                         <p class="text-xs text-azul-medio">Técnicos y Vendedores habilitados.</p>
                     </div>
                     <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-3xl shadow-inner">👥</div>
-                </div> <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 shadow-sm border border-gray-700 flex items-center justify-between hover:shadow-lg transition transform hover:-translate-y-1">
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 shadow-sm border border-gray-700 flex items-center justify-between hover:shadow-lg transition transform hover:-translate-y-1">
                     <div>
                         <p class="text-gray-400 text-xs font-bold mb-1 tracking-widest uppercase">Función de Transferencia</p>
                         <h3 class="text-xl font-mono font-extrabold text-green-400 mb-1">{{ $funcionLaplace }}</h3>
                         <p class="text-[10px] text-gray-500 font-mono">ℒ{dP/dt = -kP} | k={{ $k }}</p>
                     </div>
                     <div class="flex-shrink-0 w-14 h-14 bg-gray-800 text-green-400 border border-green-500/30 rounded-xl flex items-center justify-center text-3xl shadow-inner">ℒ</div>
-                </div>class="flex-shrink-0 w-14 h-14 bg-gray-800 text-green-400 border border-green-500/30 rounded-xl flex items-center justify-center text-3xl shadow-inner">ℒ</div>
                 </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            </div> <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-azul-muy-claro overflow-hidden hover:shadow-md transition">
                     <div class="bg-azul-oscuro px-8 py-5 flex justify-between items-center">

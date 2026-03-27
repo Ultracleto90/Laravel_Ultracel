@@ -104,6 +104,7 @@ class UsuarioController extends Controller
 
         return response()->json([
             'status' => true,
+            'id' => $user->id,
             'rol' => $user->rol,
             'name' => $user->name,
             'taller_id' => $user->taller_id

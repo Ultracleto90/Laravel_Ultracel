@@ -15,8 +15,10 @@ class PortalClienteController extends Controller
         ]);
 
         $detalles = DB::table('reparaciones as r')
-            ->join('equipos as e', 'r.equipo_id', '=', 'e.id')
-            ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
+            // 🔥 CORRECCIÓN: Usamos id_equipo en lugar de equipo_id
+            ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
+            // 🔥 CORRECCIÓN: Usamos id_cliente en lugar de cliente_id
+            ->join('clientes as c', 'e.id_cliente', '=', 'c.id_cliente')
             ->where('r.id_reparacion', $request->reparacion_id)
             ->select(
                 'r.id_reparacion as id', 
@@ -25,7 +27,7 @@ class PortalClienteController extends Controller
                 'e.modelo',
                 'c.nombre as cliente_nombre',
                 'r.estado',
-                'r.problema_reportado as falla_reportada', // 🔥 CORRECCIÓN DEL ERROR
+                'r.problema_reportado as falla_reportada', 
                 'r.diagnostico_tecnico',
                 'r.presupuesto'
             )
@@ -45,8 +47,10 @@ class PortalClienteController extends Controller
         ]);
 
         $ticket = DB::table('reparaciones as r')
-            ->join('equipos as e', 'r.equipo_id', '=', 'e.id')
-            ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
+            // 🔥 CORRECCIÓN: Usamos id_equipo en lugar de equipo_id
+            ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
+            // 🔥 CORRECCIÓN: Usamos id_cliente en lugar de cliente_id
+            ->join('clientes as c', 'e.id_cliente', '=', 'c.id_cliente')
             ->join('talleres as t', 'r.taller_id', '=', 't.id') 
             ->where('r.id_reparacion', $request->id_reparacion) 
             ->select(
@@ -57,7 +61,7 @@ class PortalClienteController extends Controller
                 'e.modelo',
                 'c.nombre as nombre_cliente',
                 'r.estado as estado_reparacion',
-                'r.problema_reportado as falla_reportada', // 🔥 CORRECCIÓN DEL ERROR
+                'r.problema_reportado as falla_reportada', 
                 'r.diagnostico_tecnico',
                 'r.presupuesto',
                 DB::raw("DATE_FORMAT(r.created_at, '%Y-%m-%d') as fecha_ingreso")

@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\PortalClienteController;
 Route::post('/movil/login', [AuthController::class, 'login']);
 Route::post('/portal/rastrear', [PortalClienteController::class, 'rastrear']);
 Route::post('/ticket/consultar', [PortalClienteController::class, 'consultarTicket']);
+Route::post('/reparaciones/actualizar-estado', [ReparacionController::class, 'updateStatus']);
 
 // =====================================================================
 // 💻 RUTAS PARA EL SISTEMA DE ESCRITORIO (PYTHON)

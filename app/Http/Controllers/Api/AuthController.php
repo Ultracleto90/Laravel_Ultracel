@@ -11,32 +11,40 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        // 1. Verificamos que Python no mande campos vacíos
+        // 1. Validación estricta
         $request->validate([
-            'email' => 'required',
+            'email' => 'required|email',
             'password' => 'required'
         ]);
 
-        // 2. Buscamos al usuario en la base de datos por su correo
+        // 2. Buscamos al usuario
         $user = User::where('email', $request->email)->first();
 
-        // 3. Si el usuario existe y su contraseña coincide con el hash guardado...
-        if ($user && Hash::check($request->password, $user->password)) {
-            
-            // ¡Éxito!
+        // 3. Verificación de credenciales
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'status' => true,
-                'message' => '¡Bienvenido a Ultracel!',
-                'usuario' => $user,
-            ], 200);
+                'status' => false,
+                'message' => 'Credenciales incorrectas. Revisa tu correo o contraseña.'
+            ], 401);
         }
 
-        // 4. Fracaso: Correo o contraseña incorrectos
-        return response()->json([
-            'status' => false,
-            'message' => 'Credenciales incorrectas. Intenta de nuevo.'
-        ], 401);
+        // 🔒 LA MAGIA: Generamos el Token de acceso (Sanctum)
+        // Le damos un nombre al token, por ejemplo "MobileToken"
+        $token = $user->createToken('MobileToken')->plainTextToken;
 
+        // 4. Respuesta "Finísima" para React Native
+        return response()->json([
+            'status' => true,
+            'message' => '¡Bienvenido a Ultracel Mobile!',
+            'token' => $token, // Aquí va la llave maestra
+            'usuario' => [
+                'id' => $user->id,
+                'nombre' => $user->name,
+                'email' => $user->email,
+                'rol' => $user->rol,
+                'taller_id' => $user->taller_id, // El filtro para Eduardo
+            ],
+        ], 200);
     }
 
     

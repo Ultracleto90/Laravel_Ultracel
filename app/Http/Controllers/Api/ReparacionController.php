@@ -81,4 +81,38 @@ class ReparacionController extends Controller
 
         return response()->json(['status' => false, 'message' => 'No se pudo actualizar la reparación o no pertenece a este taller.'], 400);
     }
+
+    // 4. El motor del Kanban: Actualizar estado al arrastrar tarjetas en React Native
+    public function updateStatus(Request $request)
+    {
+        // 1. Validamos que lleguen los datos requeridos
+        $request->validate([
+            'reparacion_id' => 'required|integer',
+            'estado' => 'required|string',
+            'taller_id' => 'required|integer'
+        ]);
+
+        // 2. Ejecutamos el cambio de estado con el candado de seguridad
+        $actualizado = DB::table('reparaciones')
+            ->where('id', $request->reparacion_id)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO VITAL
+            ->update([
+                'estado' => $request->estado,
+                'updated_at' => now()
+            ]);
+
+        // 3. Respuesta para la app móvil
+        if ($actualizado) {
+            // Tip CTO: Aquí en el futuro inyectaremos la API de WhatsApp para avisarle al cliente
+            return response()->json([
+                'status' => true, 
+                'message' => '¡Tarjeta movida a ' . strtoupper($request->estado) . ' exitosamente!'
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => false, 
+            'message' => 'No se pudo mover la tarjeta. Verifica los permisos de tu taller.'
+        ], 400);
+    }
 }

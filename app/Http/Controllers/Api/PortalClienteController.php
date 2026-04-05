@@ -80,4 +80,27 @@ class PortalClienteController extends Controller
             'ticket' => $ticket
         ], 200);
     }
+
+    public function rastreoMovil($folio)
+    {
+        $ticket = \Illuminate\Support\Facades\DB::table('reparaciones')
+            ->join('equipos', 'reparaciones.equipo_id', '=', 'equipos.id')
+            ->join('clientes', 'equipos.cliente_id', '=', 'clientes.id')
+            ->where('reparaciones.id', $folio)
+            ->select(
+                'reparaciones.id as folio', 
+                'reparaciones.estado', 
+                'clientes.nombre as cliente', 
+                'equipos.modelo', 
+                'reparaciones.falla_reportada as falla', 
+                'reparaciones.costo_estimado as cotizacion'
+            )
+            ->first();
+
+        if (!$ticket) {
+            return response()->json(['status' => false, 'message' => 'Folio no encontrado'], 404);
+        }
+
+        return response()->json($ticket, 200);
+    }
 }

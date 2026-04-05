@@ -161,4 +161,15 @@ class InventarioController extends Controller
 
         return response()->json(['status' => true, 'message' => 'Producto actualizado correctamente.']);
     }
+
+    public function inventarioSucursal($tallerId)
+    {
+        $productos = \Illuminate\Support\Facades\DB::table('inventario')
+            ->where('taller_id', $tallerId)
+            ->where('stock', '>', 0)
+            ->select('id', 'nombre', 'stock', 'precio_venta as precio') // Lalo pidió "precio"
+            ->get();
+
+        return response()->json($productos, 200); // Lalo espera el arreglo directo
+    }
 }

@@ -115,4 +115,66 @@ class ReparacionController extends Controller
             'message' => 'No se pudo mover la tarjeta. Verifica los permisos de tu taller.'
         ], 400);
     }
+
+    public function pendientesMovil($tallerId)
+    {
+        $reparaciones = \Illuminate\Support\Facades\DB::table('reparaciones')
+            ->join('equipos', 'reparaciones.equipo_id', '=', 'equipos.id')
+            ->where('reparaciones.taller_id', $tallerId)
+            ->whereNotIn('reparaciones.estado', ['entregado', 'cancelado'])
+            ->select('reparaciones.id as folio', 'equipos.modelo', 'reparaciones.estado')
+            ->get();
+
+        return response()->json($reparaciones, 200);
+    }
+
+    public function nuevaRecepcion(\Illuminate\Http\Request $request)
+    {
+        // 1. Validamos lo que manda Lalo
+        $request->validate([
+            'cliente' => 'required|string',
+            'telefono' => 'required|string',
+            'modelo' => 'required|string',
+            'falla' => 'required|string',
+            'cotizacion' => 'required|numeric'
+        ]);
+
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            // Creamos un cliente express (o lo buscas si ya existe en tu lógica completa)
+            $clienteId = \Illuminate\Support\Facades\DB::table('clientes')->insertGetId([
+                'nombre' => $request->cliente,
+                'telefono' => $request->telefono,
+                'taller_id' => $request->taller_id ?? 1, // Fallback por si no lo manda
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // Creamos el equipo
+            $equipoId = \Illuminate\Support\Facades\DB::table('equipos')->insertGetId([
+                'cliente_id' => $clienteId,
+                'modelo' => $request->modelo,
+                'tipo' => 'Celular', // Por defecto
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            // Registramos la reparación
+            \Illuminate\Support\Facades\DB::table('reparaciones')->insert([
+                'taller_id' => $request->taller_id ?? 1,
+                'equipo_id' => $equipoId,
+                'estado' => 'recibido',
+                'falla_reportada' => $request->falla,
+                'costo_estimado' => $request->cotizacion,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+            return response()->json(['status' => true, 'message' => 'Reparación guardada con éxito'], 201);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['status' => false, 'message' => 'Error al guardar: ' . $e->getMessage()], 500);
+        }
+    }
 }

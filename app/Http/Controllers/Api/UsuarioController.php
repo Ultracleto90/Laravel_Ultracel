@@ -110,4 +110,27 @@ class UsuarioController extends Controller
             'taller_id' => $user->taller_id
         ], 200);
     }
+    public function registroMovil(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+        ]);
+
+        $user = \App\Models\User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'rol' => $request->rol ?? 'vendedor',
+            'taller_id' => $request->taller_id ?? 1,
+            'permitido' => 1
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Usuario registrado exitosamente',
+            'usuario' => $user
+        ], 201);
+    }
 }

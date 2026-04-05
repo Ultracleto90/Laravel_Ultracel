@@ -118,14 +118,16 @@ class UsuarioController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        $user = \App\Models\User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
-            'rol' => $request->rol ?? 'vendedor',
-            'taller_id' => $request->taller_id ?? 1,
-            'permitido' => 1
-        ]);
+        // Evitamos el bloqueo de $fillable instanciando manualmente
+        $user = new \App\Models\User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        $user->rol = $request->rol ?? 'vendedor';
+        $user->taller_id = $request->taller_id ?? 1;
+        $user->especialidad = 'General'; // Evitamos error de columna vacía
+        $user->permitido = 1;
+        $user->save();
 
         return response()->json([
             'status' => true,

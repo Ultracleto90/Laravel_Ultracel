@@ -17,10 +17,10 @@ class ReparacionController extends Controller
             ->where('reparaciones.taller_id', $request->taller_id) // 🔒 CANDADO OK (Ya lo tenías)
             ->whereNotIn('reparaciones.estado', ['entregado', 'cancelado']) // Usando los valores ENUM correctos de tu DB
             ->select(
-                'reparaciones.id_reparacion', // 🐛 ¡Corregido al nombre real de tu BD!
+                'reparaciones.id_reparacion', 
                 DB::raw("CONCAT(equipos.marca, ' ', equipos.modelo) as dispositivo"),
                 'reparaciones.estado',
-                'reparaciones.falla_reportada' // Ajustado al nombre real de la columna
+                'reparaciones.problema_reportado' // 🔙 Revertido a tu nombre original de BD
             )
             ->orderBy('reparaciones.created_at', 'desc') // Usamos created_at porque fecha_recepcion no existe en tu esquema
             ->get();
@@ -50,7 +50,7 @@ class ReparacionController extends Controller
                 'e.contrasena_desbloqueo', 
                 'c.nombre as cliente_nombre', 
                 'c.telefono',
-                'r.falla_reportada', 
+                'r.problema_reportado', // 🔙 Revertido a tu nombre original de BD
                 'r.estado',
                 'r.diagnostico_tecnico', 
                 'u.name as tecnico_asignado'

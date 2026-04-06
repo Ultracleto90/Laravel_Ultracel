@@ -163,7 +163,7 @@
                         <p class="text-azul-claro text-sm font-medium mb-6 leading-relaxed">Equipa tu mostrador con la versión de Windows o dale movilidad a tus técnicos con la App Android.</p>
                         
                         <div class="space-y-3">
-                            <a href="AQUI_PEGA_TU_LINK_DE_MEDIAFIRE_PARA_WINDOWS" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-white text-azul-oscuro font-bold py-3 rounded-xl hover:bg-azul-muy-claro transition shadow-lg">
+                            <a href="https://www.mediafire.com/file/fdc1vvebdng3euy/Ultracel_Setup.exe/file" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-white text-azul-oscuro font-bold py-3 rounded-xl hover:bg-azul-muy-claro transition shadow-lg">
                                 <span class="text-xl">🪟</span> Descargar para Windows
                             </a>
                             

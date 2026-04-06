@@ -13,8 +13,9 @@ class ReparacionController extends Controller
     {
         // Traemos todas las reparaciones del taller que NO hayan sido entregadas al cliente
         $reparaciones = DB::table('reparaciones')
-            ->join('equipos', 'reparaciones.equipo_id', '=', 'equipos.id')
-            ->where('reparaciones.taller_id', $request->taller_id) // 🔒 CANDADO OK (Ya lo tenías)
+            // 🐛 Corregimos los nombres de las columnas en el JOIN
+            ->join('equipos', 'reparaciones.id_equipo', '=', 'equipos.id_equipo') 
+            ->where('reparaciones.taller_id', $request->taller_id)// 🔒 CANDADO OK (Ya lo tenías)
             ->whereNotIn('reparaciones.estado', ['entregado', 'cancelado']) // Usando los valores ENUM correctos de tu DB
             ->select(
                 'reparaciones.id_reparacion', 
@@ -35,8 +36,10 @@ class ReparacionController extends Controller
     public function detalles(Request $request)
     {
         $detalles = DB::table('reparaciones as r')
-            ->join('equipos as e', 'r.equipo_id', '=', 'e.id')
-            ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
+            // 🐛 Corregimos el JOIN de equipos
+            ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo') 
+            // Si la tabla clientes también usa "id_cliente" en lugar de "id", cámbialo así:
+            ->join('clientes as c', 'e.id_cliente', '=', 'c.id_cliente')
             ->leftJoin('users as u', 'r.tecnico_id', '=', 'u.id')
             ->where('r.taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO (Protege datos del cliente y contraseñas)
             ->where('r.id_reparacion', $request->reparacion_id) // 🐛 Corregido

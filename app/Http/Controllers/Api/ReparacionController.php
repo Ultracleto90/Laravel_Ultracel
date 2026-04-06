@@ -17,7 +17,7 @@ class ReparacionController extends Controller
             ->where('reparaciones.taller_id', $request->taller_id) // 🔒 CANDADO OK (Ya lo tenías)
             ->whereNotIn('reparaciones.estado', ['entregado', 'cancelado']) // Usando los valores ENUM correctos de tu DB
             ->select(
-                'reparaciones.id', // Llave primaria de la reparación
+                'reparaciones.id_reparacion', // 🐛 ¡Corregido al nombre real de tu BD!
                 DB::raw("CONCAT(equipos.marca, ' ', equipos.modelo) as dispositivo"),
                 'reparaciones.estado',
                 'reparaciones.falla_reportada' // Ajustado al nombre real de la columna
@@ -39,9 +39,9 @@ class ReparacionController extends Controller
             ->join('clientes as c', 'e.cliente_id', '=', 'c.id')
             ->leftJoin('users as u', 'r.tecnico_id', '=', 'u.id')
             ->where('r.taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO (Protege datos del cliente y contraseñas)
-            ->where('r.id', $request->reparacion_id) 
+            ->where('r.id_reparacion', $request->reparacion_id) // 🐛 Corregido
             ->select(
-                'r.id', // <--- ¡Faltaba este para el número de folio del ticket!
+                'r.id_reparacion', // 🐛 Corregido// <--- ¡Faltaba este para el número de folio del ticket!
                 'r.taller_id', // <--- ¡El pase VIP para la tiendita!
                 'e.marca', 
                 'e.modelo', 
@@ -68,8 +68,8 @@ class ReparacionController extends Controller
     public function terminar(Request $request)
     {
         $actualizado = DB::table('reparaciones')
-            ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO (Evita modificar equipos ajenos)
-            ->where('id', $request->reparacion_id)
+            ->where('taller_id', $request->taller_id) 
+            ->where('id_reparacion', $request->reparacion_id) // 🐛 Corregido
             ->update([
                 'estado' => 'listo', // Tu ENUM no tiene 'Reparado', tiene 'listo'
                 'fecha_entrega_real' => now()
@@ -94,7 +94,7 @@ class ReparacionController extends Controller
 
         // 2. Ejecutamos el cambio de estado con el candado de seguridad
         $actualizado = DB::table('reparaciones')
-            ->where('id', $request->reparacion_id)
+            ->where('id_reparacion', $request->reparacion_id) // 🐛 Corregido
             ->where('taller_id', $request->taller_id) // 🔒 CANDADO VITAL
             ->update([
                 'estado' => $request->estado,

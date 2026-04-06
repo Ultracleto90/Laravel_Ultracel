@@ -163,11 +163,11 @@
                         <p class="text-azul-claro text-sm font-medium mb-6 leading-relaxed">Equipa tu mostrador con la versión de Windows o dale movilidad a tus técnicos con la App Android.</p>
                         
                         <div class="space-y-3">
-                            <a href="{{ asset('descargas/Ultracel.exe') }}" download class="flex items-center justify-center gap-2 w-full bg-white text-azul-oscuro font-bold py-3 rounded-xl hover:bg-azul-muy-claro transition shadow-lg">
+                            <a href="AQUI_PEGA_TU_LINK_DE_MEDIAFIRE_PARA_WINDOWS" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-white text-azul-oscuro font-bold py-3 rounded-xl hover:bg-azul-muy-claro transition shadow-lg">
                                 <span class="text-xl">🪟</span> Descargar para Windows
                             </a>
                             
-                            <a href="{{ asset('descargas/Ultracel_Mobile.apk') }}" download class="flex items-center justify-center gap-2 w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black border border-azul-claro/30 transition shadow-lg">
+                            <a href="https://www.mediafire.com/file/oc9b6sup193x48u/application-9790f7c9-a38a-4166-a2ce-2865fa05cc84.apk/file" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black border border-azul-claro/30 transition shadow-lg">
                                 <span class="text-xl">🤖</span> Descargar para Android (APK)
                             </a>
                         </div>

@@ -158,12 +158,19 @@
 
                 <div class="bg-gradient-to-br from-azul-medio to-azul-oscuro rounded-3xl shadow-sm p-8 text-white flex flex-col justify-center relative overflow-hidden">
                     <div class="relative z-10">
-                        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl mb-6 backdrop-blur-sm">🚀</div>
-                        <h3 class="text-2xl font-bold mb-2">Descarga la App</h3>
-                        <p class="text-azul-claro text-sm font-medium mb-6 leading-relaxed">Instala el Software de Mostrador y usa tu token para sincronizar.</p>
-                        <a href="{{ asset('descargas/Ultracel_Setup.exe') }}" download class="block text-center w-full bg-white text-azul-oscuro font-bold py-3 rounded-xl hover:bg-azul-muy-claro transition shadow-lg">
-                            Descargar para Windows
-                        </a>
+                        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-3xl mb-6 backdrop-blur-sm">📱💻</div>
+                        <h3 class="text-2xl font-bold mb-2">Descarga el Software</h3>
+                        <p class="text-azul-claro text-sm font-medium mb-6 leading-relaxed">Equipa tu mostrador con la versión de Windows o dale movilidad a tus técnicos con la App Android.</p>
+                        
+                        <div class="space-y-3">
+                            <a href="{{ asset('descargas/Ultracel.exe') }}" download class="flex items-center justify-center gap-2 w-full bg-white text-azul-oscuro font-bold py-3 rounded-xl hover:bg-azul-muy-claro transition shadow-lg">
+                                <span class="text-xl">🪟</span> Descargar para Windows
+                            </a>
+                            
+                            <a href="{{ asset('descargas/Ultracel_Mobile.apk') }}" download class="flex items-center justify-center gap-2 w-full bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-black border border-azul-claro/30 transition shadow-lg">
+                                <span class="text-xl">🤖</span> Descargar para Android (APK)
+                            </a>
+                        </div>
                     </div>
                     <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
                 </div>

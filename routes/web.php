@@ -13,6 +13,10 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', \App\Http\Middleware\AdminMiddleware::class])->name('dashboard');
 
+Route::get('/documentacion', function () {
+    return view('documentacion');
+})->middleware(['auth', 'verified'])->name('documentacion');
+
 Route::get('/suscripciones', function () {
     return view('suscripciones');
 })->middleware(['auth', 'verified'])->name('suscripciones');

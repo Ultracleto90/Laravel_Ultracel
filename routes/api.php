@@ -86,3 +86,4 @@ Route::get('/reparaciones/pendientes/{tallerId}', [\App\Http\Controllers\Api\Rep
 Route::get('/reparaciones/rastreo/{folio}', [\App\Http\Controllers\Api\PortalClienteController::class, 'rastreoMovil']);
 Route::post('/reparaciones/nueva', [\App\Http\Controllers\Api\ReparacionController::class, 'nuevaRecepcion']);
 Route::post('/movil/registro', [\App\Http\Controllers\Api\UsuarioController::class, 'registroMovil']);
+Route::post('/inventario/agregar', [\App\Http\Controllers\Api\InventarioController::class, 'agregarMovil']);

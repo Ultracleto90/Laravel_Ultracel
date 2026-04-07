@@ -162,14 +162,39 @@ class InventarioController extends Controller
         return response()->json(['status' => true, 'message' => 'Producto actualizado correctamente.']);
     }
 
+    // =========================================================
+    // 📱 FUNCIONES DE RESCATE EXCLUSIVAS PARA LA APP DE LALO
+    // =========================================================
+
+    public function agregarMovil(Request $request)
+    {
+        // 1. Generamos un SKU automático porque Lalo no lo tiene en la app
+        $sku_automatico = 'MOB-' . strtoupper(substr(uniqid(), -5));
+
+        // 2. Mapeamos lo que manda Lalo a lo que espera tu BD
+        \Illuminate\Support\Facades\DB::table('inventario')->insert([
+            'taller_id' => $request->taller_id ?? 1,
+            'sku' => $sku_automatico,
+            'nombre_producto' => $request->nombre, // Lalo manda 'nombre'
+            'precio_venta' => $request->precio,    // Lalo manda 'precio'
+            'stock' => $request->stock,            // Lalo manda 'stock'
+            'tipo_producto' => 'Refacción',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['status' => true, 'message' => 'Refacción guardada desde el móvil.']);
+    }
+
     public function inventarioSucursal($tallerId)
     {
         $productos = \Illuminate\Support\Facades\DB::table('inventario')
             ->where('taller_id', $tallerId)
             ->where('stock', '>', 0)
-            ->select('id', 'nombre', 'stock', 'precio_venta as precio') // Lalo pidió "precio"
+            // 🐛 CORREGIDO: Tus columnas en BD se llaman id_producto y nombre_producto
+            ->select('id_producto as id', 'nombre_producto as nombre', 'stock', 'precio_venta as precio') 
             ->get();
 
-        return response()->json($productos, 200); // Lalo espera el arreglo directo
+        return response()->json($productos, 200); 
     }
 }

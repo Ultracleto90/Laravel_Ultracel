@@ -214,10 +214,15 @@ class ReparacionController extends Controller
             ->first();
 
         // 3. Si alguien intenta adivinar el PIN y falla:
+        // 3. Si alguien intenta adivinar el PIN y falla (MODO DEBUG ACTIVADO)
         if (!$reparacion) {
             return response()->json([
                 'status' => false, 
-                'message' => 'Folio o PIN incorrectos. Verifica tu ticket de servicio.'
+                'message' => 'Folio o PIN incorrectos. Verifica tu ticket de servicio.',
+                'debug_folio_que_recibio_el_servidor' => $request->folio,
+                'debug_pin_que_recibio_el_servidor' => $request->pin,
+                'debug_tipo_de_dato_folio' => gettype($request->folio),
+                'debug_tipo_de_dato_pin' => gettype($request->pin)
             ], 404);
         }
 

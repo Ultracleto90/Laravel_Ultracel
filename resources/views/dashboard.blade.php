@@ -46,73 +46,82 @@
         $funcionLaplace = "P(s) = " . $p0 . " / (s + " . $k . ")";
     @endphp
 
+    <style>
+        /* Esto oscurece el fondo general y el header que vienen de app.blade.php */
+        main { background-color: #111827 !important; }
+        header.bg-white { background-color: #1F2937 !important; border-bottom: 1px solid #374151 !important; }
+        header.bg-white * { color: #E5E7EB !important; }
+    </style>
+
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-gray-200 leading-tight flex items-center gap-3">
                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Hola, {{ \Illuminate\Support\Facades\Auth::user()->name }}
             </h2>
-            <span class="bg-gray-800 text-gray-300 border border-gray-700 px-4 py-1 rounded-md text-xs font-semibold tracking-wider uppercase shadow-sm">
+            <span class="bg-gray-800 text-gray-300 border border-gray-600 px-4 py-1.5 rounded-md text-xs font-bold tracking-wider uppercase shadow-sm">
                 {{ $taller->nombre_negocio }}
             </span>
         </div>
     </x-slot>
 
-    <div class="py-10 bg-[#0B1120] min-h-screen text-gray-300">
+    <div class="py-10 bg-gray-900 min-h-screen text-gray-300">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 
-                <div class="bg-gray-800 rounded-2xl p-6 shadow-md border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
+                <div class="bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
                     <div>
                         <p class="text-gray-400 text-sm font-semibold mb-1 tracking-wide">Reparaciones en Taller</p>
                         <h3 class="text-3xl font-extrabold text-white">{{ $reparacionesActivasReal }}</h3>
                         <p class="text-xs text-gray-500 mt-1">No entregadas / canceladas.</p>
                     </div>
                     <div class="w-14 h-14 bg-gray-900 border border-gray-700 rounded-xl flex items-center justify-center shadow-inner">
-                        <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     </div>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl p-6 shadow-md border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
+                <div class="bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
                     <div>
                         <p class="text-gray-400 text-sm font-semibold mb-1 tracking-wide">Ingresos del Mes</p>
                         <h3 class="text-3xl font-extrabold text-white">{{ $ingresosMes }}</h3>
                         <p class="text-xs text-green-400 font-medium mt-1">Calculado en tiempo real</p>
                     </div>
                     <div class="w-14 h-14 bg-gray-900 border border-gray-700 rounded-xl flex items-center justify-center shadow-inner">
-                        <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl p-6 shadow-md border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
+                <div class="bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
                     <div>
                         <p class="text-gray-400 text-sm font-semibold mb-1 tracking-wide">Empleados Activos</p>
                         <h3 class="text-3xl font-extrabold text-white">{{ $usuariosActivosCount }}</h3>
-                        <p class="text-xs text-gray-500 mt-1">Técnicos y Vendedores habilitados.</p>
+                        <p class="text-xs text-gray-500 mt-1">Técnicos y Vendedores.</p>
                     </div>
                     <div class="w-14 h-14 bg-gray-900 border border-gray-700 rounded-xl flex items-center justify-center shadow-inner">
-                        <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 shadow-md border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
+                <div class="bg-gray-900 rounded-2xl p-6 shadow-lg border border-gray-700 flex items-center justify-between hover:border-gray-500 transition">
                     <div>
-                        <p class="text-gray-400 text-xs font-bold mb-1 tracking-widest uppercase">Función de Transferencia</p>
+                        <p class="text-gray-500 text-xs font-bold mb-1 tracking-widest uppercase">Función de Transferencia</p>
                         <h3 class="text-xl font-mono font-extrabold text-green-400 mb-1">{{ $funcionLaplace }}</h3>
-                        <p class="text-[10px] text-gray-500 font-mono mt-1">ℒ{dP/dt = -kP} | k={{ $k }}</p>
+                        <p class="text-[10px] text-gray-600 font-mono mt-1">ℒ{dP/dt = -kP} | k={{ $k }}</p>
                     </div>
                     <div class="flex-shrink-0 w-14 h-14 bg-black border border-green-500/30 rounded-xl flex items-center justify-center shadow-inner">
-                        <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                 </div>
 
             </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
-                <div class="lg:col-span-2 bg-gray-800 rounded-3xl shadow-md border border-gray-700 overflow-hidden hover:border-gray-500 transition">
+                <div class="lg:col-span-2 bg-gray-800 rounded-3xl shadow-lg border border-gray-700 overflow-hidden hover:border-gray-500 transition">
                     <div class="bg-gray-900 px-8 py-5 flex justify-between items-center border-b border-gray-700">
                         <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
                             Estado de Licencia
                         </h3>
                         
@@ -132,20 +141,20 @@
                             
                             <p class="text-sm text-gray-500 mb-6">Asegúrate de renovar antes de esta fecha para no perder el acceso a tu software.</p>
                             
-                            <a href="{{ route('taller.suscripcion') }}" class="inline-block text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-md w-full md:w-auto">
+                            <a href="{{ route('taller.suscripcion') }}" class="inline-block text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-md w-full md:w-auto border border-blue-500">
                                 Renovar / Cambiar Plan
                             </a>
                         </div>
                         
-                        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-700">
+                        <div class="bg-gray-900 p-5 rounded-2xl border border-gray-700 shadow-inner">
                             <p class="text-sm font-bold text-gray-300 mb-2 flex items-center gap-2">
-                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                                <svg class="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
                                 Token de Conexión (App Python)
                             </p>
                             <p class="text-xs text-gray-500 mb-3">Ingresa esta clave en tu Software de Escritorio Ultracel.</p>
                             
                             <div class="flex items-center gap-2">
-                                <code class="bg-black border border-gray-700 px-4 py-3 rounded-lg text-green-400 font-mono font-bold w-full text-center shadow-inner tracking-widest text-lg">
+                                <code class="bg-black border border-gray-800 px-4 py-3 rounded-lg text-green-400 font-mono font-bold w-full text-center shadow-inner tracking-widest text-lg">
                                     {{ $taller->token_licencia ?? 'GENERANDO...' }}
                                 </code>
                             </div>
@@ -153,22 +162,22 @@
                     </div>
                 </div>
 
-                <div class="bg-gradient-to-br from-blue-900 to-gray-900 rounded-3xl shadow-md p-8 text-white flex flex-col justify-center relative overflow-hidden border border-gray-700 hover:border-gray-500 transition">
+                <div class="bg-gradient-to-br from-blue-900 to-gray-900 rounded-3xl shadow-lg p-8 text-white flex flex-col justify-center relative overflow-hidden border border-gray-700 hover:border-gray-500 transition">
                     <div class="relative z-10">
                         <div class="w-14 h-14 bg-gray-800 border border-gray-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
-                            <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         </div>
                         <h3 class="text-2xl font-bold mb-2">Descarga el Software</h3>
                         <p class="text-gray-300 text-sm font-medium mb-6 leading-relaxed">Equipa tu mostrador con la versión de Windows o dale movilidad a tus técnicos con la App Android.</p>
                         
                         <div class="space-y-3">
                             <a href="https://www.mediafire.com/file/fdc1vvebdng3euy/Ultracel_Setup.exe/file" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-white text-gray-900 font-bold py-3 rounded-xl hover:bg-gray-200 transition shadow-lg">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/></svg>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/></svg>
                                 Para Windows
                             </a>
                             
                             <a href="https://www.mediafire.com/file/oc9b6sup193x48u/application-9790f7c9-a38a-4166-a2ce-2865fa05cc84.apk/file" target="_blank" rel="noopener noreferrer" class="flex items-center justify-center gap-2 w-full bg-gray-800 text-white font-bold py-3 rounded-xl hover:bg-gray-700 border border-gray-600 transition shadow-lg">
-                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4483-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5515 0 .9997.4482.9997.9993 0 .5511-.4482.9997-.9997.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.4161.4161 0 00-.5676.1521l-2.0223 3.503C15.5902 8.246 13.8533 7.85 12 7.85s-3.5902.396-5.1367 1.1004L4.841 5.4475a.4161.4161 0 00-.5676-.1521.4158.4158 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3436-4.1021-2.6892-7.5743-6.1185-9.4396"/></svg>
+                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4483-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5515 0 .9997.4482.9997.9993 0 .5511-.4482.9997-.9997.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.4161.4161 0 00-.5676.1521l-2.0223 3.503C15.5902 8.246 13.8533 7.85 12 7.85s-3.5902.396-5.1367 1.1004L4.841 5.4475a.4161.4161 0 00-.5676-.1521.4158.4158 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3436-4.1021-2.6892-7.5743-6.1185-9.4396"/></svg>
                                 Para Android (APK)
                             </a>
                         </div>
@@ -177,6 +186,7 @@
                 </div>
 
             </div>
+
             @if(session('success'))
                 <div class="bg-green-900/30 border-l-4 border-green-500 text-green-400 p-4 rounded shadow-sm font-bold flex items-center gap-3">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -204,7 +214,7 @@
                 deleteModal: false, 
                 editForm: { id: '', name: '', email: '', rol: '' },
                 deleteForm: { id: '', name: '' }
-            }" class="bg-gray-800 rounded-3xl shadow-md border border-gray-700 overflow-hidden relative hover:border-gray-500 transition">
+            }" class="bg-gray-800 rounded-3xl shadow-lg border border-gray-700 overflow-hidden relative hover:border-gray-500 transition">
                 
                 <div class="px-8 py-6 border-b border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-800/50">
                     <div>
@@ -342,7 +352,7 @@
                                 <input type="email" name="email" x-model="editForm.email" required class="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-300 mb-1">Nueva Contraseña (Opcional)</label>
+                                <label class="block text-sm font-semibold text-gray-300 mb-1">Nueva Contraseña</label>
                                 <input type="password" name="password" class="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Déjalo en blanco si no cambias">
                             </div>
                             <div>
@@ -366,7 +376,7 @@
                             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         </div>
                         <h3 class="text-2xl font-bold text-white mb-2">¿Estás seguro?</h3>
-                        <p class="text-gray-400 mb-8">Estás a punto de eliminar a <span class="font-bold text-red-400" x-text="deleteForm.name"></span>. Esta acción no se puede deshacer y borrará su acceso al instante.</p>
+                        <p class="text-gray-400 mb-8">Estás a punto de eliminar a <span class="font-bold text-red-400" x-text="deleteForm.name"></span>. Esta acción borrará su acceso al instante.</p>
                         
                         <form :action="'/taller/usuarios/' + deleteForm.id" method="POST" class="flex justify-center gap-4">
                             @csrf
@@ -382,8 +392,3 @@
         </div>
     </div>
 </x-app-layout>
-
-
-
-
-            

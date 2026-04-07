@@ -153,18 +153,31 @@ class ReparacionController extends Controller
                 'updated_at' => now()
             ]);
         
-            DB::table('reparaciones')->insert([
+            // 🔐 GENERADOR DE PIN SEGURO (4 DÍGITOS)
+            $pinAleatorio = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+
+            // Cambiamos insert por insertGetId para atrapar el folio
+            $id_reparacion = DB::table('reparaciones')->insertGetId([
                 'taller_id' => $request->taller_id ?? 1,
                 'id_equipo' => $equipoId, 
                 'estado' => 'Recibido', 
                 'problema_reportado' => $request->falla, 
                 'presupuesto' => $request->cotizacion, 
+                'pin_cliente' => $pinAleatorio, // <-- EL CANDADO APLICADO
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
             DB::commit();
-            return response()->json(['status' => true, 'message' => 'Reparación guardada con éxito'], 201);
+            
+            // Le regresamos el folio y pin a Lalo para que los muestre en la app
+            return response()->json([
+                'status' => true, 
+                'message' => 'Reparación guardada con éxito',
+                'folio' => $id_reparacion,
+                'pin' => $pinAleatorio
+            ], 201);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => false, 'message' => 'Error al guardar: ' . $e->getMessage()], 500);

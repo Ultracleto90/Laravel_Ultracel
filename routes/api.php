@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\POSController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\PortalClienteController;
 use App\Http\Controllers\ReparacionController as WebReparacionController;
+use App\Http\Controllers\Api\DashboardController;
 // =====================================================================
 // 📱 RUTAS EXCLUSIVAS PARA LA APP MÓVIL (REACT NATIVE)
 // =====================================================================
@@ -38,6 +39,9 @@ Route::post('/empleados', [UsuarioController::class, 'listarEmpleados']);
 Route::post('/empleado/ver', [UsuarioController::class, 'verEmpleado']);
 Route::post('/empleado/crear', [UsuarioController::class, 'crearEmpleado']);
 Route::post('/empleado/actualizar', [UsuarioController::class, 'actualizarEmpleado']);
+
+// --- DASHBOARD ANALÍTICO ---
+Route::post('/dashboard/analiticas', [DashboardController::class, 'obtenerAnaliticas']);
 
 // --- REPARACIONES Y DIAGNÓSTICOS ---
 Route::post('/reparaciones/pendientes', [ReparacionController::class, 'pendientes']);

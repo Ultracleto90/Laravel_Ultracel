@@ -139,17 +139,28 @@ class ClienteController extends Controller
                 'created_at' => now()
             ]);
 
-            // 3. Insertar reparación
-            DB::table('reparaciones')->insert([
+            // 🔐 3. GENERADOR DE PIN SEGURO (4 DÍGITOS)
+            $pinAleatorio = str_pad(mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+
+            // 4. Insertar reparación (¡Cambiamos a insertGetId para atrapar el Folio!)
+            $id_reparacion = DB::table('reparaciones')->insertGetId([
                 'id_equipo' => $id_equipo,
                 'taller_id' => $request->taller_id, // 🔒 CANDADO OK
                 'problema_reportado' => $request->equipo['descripcion'],
                 'estado' => 'Recibido',
+                'pin_cliente' => $pinAleatorio, // <-- EL NUEVO CANDADO INYECTADO
                 'fecha_recepcion' => now()
             ]);
 
             DB::commit();
-            return response()->json(['status' => true, 'message' => 'Equipo registrado correctamente.']);
+            
+            // 🚀 Regresamos el Folio y el PIN a la App de Python
+            return response()->json([
+                'status' => true, 
+                'message' => 'Equipo registrado correctamente.',
+                'folio' => $id_reparacion,
+                'pin' => $pinAleatorio
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);

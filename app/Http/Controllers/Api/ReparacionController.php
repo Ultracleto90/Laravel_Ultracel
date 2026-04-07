@@ -122,10 +122,12 @@ class ReparacionController extends Controller
     public function pendientesMovil($tallerId)
     {
         $reparaciones = \Illuminate\Support\Facades\DB::table('reparaciones')
-            ->join('equipos', 'reparaciones.equipo_id', '=', 'equipos.id')
+            // 🐛 CORREGIDO: Nombres exactos de tus llaves
+            ->join('equipos', 'reparaciones.id_equipo', '=', 'equipos.id_equipo')
             ->where('reparaciones.taller_id', $tallerId)
-            ->whereNotIn('reparaciones.estado', ['entregado', 'cancelado'])
-            ->select('reparaciones.id as folio', 'equipos.modelo', 'reparaciones.estado')
+            ->whereNotIn('reparaciones.estado', ['Entregado', 'Cancelado'])
+            // 🐛 CORREGIDO: id_reparacion en lugar de id
+            ->select('reparaciones.id_reparacion as folio', 'equipos.modelo', 'reparaciones.estado')
             ->get();
 
         return response()->json($reparaciones, 200);
@@ -157,20 +159,22 @@ class ReparacionController extends Controller
 
             // 2. Creamos el equipo
             $equipoId = \Illuminate\Support\Facades\DB::table('equipos')->insertGetId([
-                'id_cliente' => $clienteId, // 🐛 CORREGIDO: id_cliente en lugar de cliente_id
+                'id_cliente' => $clienteId, 
                 'modelo' => $request->modelo,
-                'tipo' => 'Celular', // Por defecto
+                'tipo_equipo' => 'Celular', // 🐛 CORREGIDO: Tu tabla dice tipo_equipo, no tipo
+                'marca' => 'Generica', // 🐛 AÑADIDO: Tu tabla exige una marca, le ponemos esta por defecto
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
+        
             // 3. Registramos la reparación
             \Illuminate\Support\Facades\DB::table('reparaciones')->insert([
                 'taller_id' => $request->taller_id ?? 1,
-                'id_equipo' => $equipoId, // 🐛 CORREGIDO: id_equipo en lugar de equipo_id
-                'estado' => 'recibido',
-                'problema_reportado' => $request->falla, // 🐛 CORREGIDO: Tu nombre de columna original
-                'costo_estimado' => $request->cotizacion,
+                'id_equipo' => $equipoId, 
+                'estado' => 'Recibido', // 🐛 CORREGIDO: Con mayúscula como tu ENUM
+                'problema_reportado' => $request->falla, 
+                'presupuesto' => $request->cotizacion, // 🐛 CORREGIDO: Tu tabla dice presupuesto, no costo_estimado
                 'created_at' => now(),
                 'updated_at' => now()
             ]);

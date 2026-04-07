@@ -186,4 +186,5 @@ class ReparacionController extends Controller
             return response()->json(['status' => false, 'message' => 'Error al guardar: ' . $e->getMessage()], 500);
         }
     }
+    
 }

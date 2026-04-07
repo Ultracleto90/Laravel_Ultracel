@@ -13,18 +13,18 @@ class InventarioController extends Controller
     {
         $request->validate(['taller_id' => 'required|integer']);
         
-        // Si no mandan término de búsqueda, usamos un string vacío para traer todo
         $termino = $request->termino ?? '';
 
         $productos = DB::table('inventario')
-            ->where('taller_id', $request->taller_id) // 🔒 CANDADO PERFECTO (Ya lo tenías)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO PERFECTO
             ->where(function($query) use ($termino) {
                 $query->where('nombre_producto', 'LIKE', "%{$termino}%")
                       ->orWhere('marca_compatible', 'LIKE', "%{$termino}%")
                       ->orWhere('sku', 'LIKE', "%{$termino}%");
             })
             ->orderBy('nombre_producto', 'asc')
-            ->select('sku', 'nombre_producto', 'tipo_producto', 'stock', 'precio_venta', 'ubicacion_almacen')
+            // 🐛 PARCHE: Agregamos 'id_producto' al select porque Python lo necesita
+            ->select('id_producto', 'sku', 'nombre_producto', 'tipo_producto', 'stock', 'precio_venta', 'ubicacion_almacen')
             ->get();
 
         return response()->json([
@@ -33,11 +33,13 @@ class InventarioController extends Controller
         ]);
     }
     
-    // Obtener un producto específico por ID (para rellenar el formulario de edición)
+    // Obtener un producto específico por ID
     public function obtenerProducto(Request $request)
     {
+        $request->validate(['taller_id' => 'required|integer', 'id_producto' => 'required|integer']);
+
         $producto = DB::table('inventario')
-            ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO 
             ->where('id_producto', $request->id_producto)
             ->first();
             
@@ -47,9 +49,11 @@ class InventarioController extends Controller
     // Obtener el ID de un producto buscando por su SKU
     public function obtenerIdPorSku(Request $request)
     {
+        $request->validate(['taller_id' => 'required|integer', 'sku' => 'required|string']);
+
         $producto = DB::table('inventario')
             ->where('sku', $request->sku)
-            ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO
             ->first();
             
         return response()->json(['status' => true, 'id_producto' => $producto ? $producto->id_producto : null]);
@@ -82,7 +86,7 @@ class InventarioController extends Controller
 
             if ($request->id_producto) {
                 DB::table('inventario')
-                    ->where('taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD AÑADIDO
+                    ->where('taller_id', $request->taller_id) // 🔒 CANDADO 
                     ->where('id_producto', $request->id_producto)
                     ->update($datos);
                 $mensaje = 'Producto actualizado correctamente.';
@@ -103,9 +107,11 @@ class InventarioController extends Controller
     // Eliminar un producto permanentemente
     public function eliminarProducto(Request $request)
     {
+        $request->validate(['taller_id' => 'required|integer', 'sku' => 'required|string']);
+
          try {
              DB::table('inventario')
-                 ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías, solo lo ordené)
+                 ->where('taller_id', $request->taller_id) // 🔒 CANDADO
                  ->where('sku', $request->sku)
                  ->delete();
                  
@@ -118,22 +124,22 @@ class InventarioController extends Controller
     // --- CREAR NUEVO PRODUCTO ---
     public function crearProducto(Request $request)
     {
-        // 1. Verificamos que el SKU no esté repetido en el mismo taller
+        $request->validate(['taller_id' => 'required|integer', 'sku' => 'required|string']);
+
         $existe = DB::table('inventario')
             ->where('sku', $request->sku)
-            ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO
             ->first();
 
         if ($existe) {
             return response()->json(['status' => false, 'message' => 'Ese SKU ya está registrado en el inventario.'], 400);
         }
 
-        // 2. Lo guardamos en la base de datos
         DB::table('inventario')->insert([
             'taller_id' => $request->taller_id,
             'sku' => $request->sku,
             'nombre_producto' => $request->nombre_producto,
-            'tipo_producto' => $request->tipo_producto, // Aquí llega "Refacción" o "Venta Directa"
+            'tipo_producto' => $request->tipo_producto, 
             'marca_compatible' => $request->marca_compatible,
             'stock' => $request->stock,
             'precio_venta' => $request->precio_venta,
@@ -147,8 +153,10 @@ class InventarioController extends Controller
     // --- ACTUALIZAR PRODUCTO EXISTENTE ---
     public function actualizarProducto(Request $request)
     {
+        $request->validate(['taller_id' => 'required|integer', 'sku' => 'required|string']);
+
         DB::table('inventario')
-            ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías, solo lo subí de orden)
+            ->where('taller_id', $request->taller_id) // 🔒 CANDADO
             ->where('sku', $request->sku)
             ->update([
                 'nombre_producto' => $request->nombre_producto,
@@ -163,21 +171,26 @@ class InventarioController extends Controller
     }
 
     // =========================================================
-    // 📱 FUNCIONES DE RESCATE EXCLUSIVAS PARA LA APP DE LALO
+    // 📱 FUNCIONES EXCLUSIVAS PARA LA APP MÓVIL
     // =========================================================
 
     public function agregarMovil(Request $request)
     {
-        // 1. Generamos un SKU automático porque Lalo no lo tiene en la app
+        // 🔒 FUGA DE DATOS SELLADA: Obligamos a la App a mandar su ID, si no, lo rechazamos.
+        $request->validate([
+            'taller_id' => 'required|integer',
+            'nombre' => 'required|string',
+            'precio' => 'required|numeric'
+        ]);
+
         $sku_automatico = 'MOB-' . strtoupper(substr(uniqid(), -5));
 
-        // 2. Mapeamos lo que manda Lalo a lo que espera tu BD
-        \Illuminate\Support\Facades\DB::table('inventario')->insert([
-            'taller_id' => $request->taller_id ?? 1,
+        DB::table('inventario')->insert([
+            'taller_id' => $request->taller_id, // YA NO DEFAULTA A 1
             'sku' => $sku_automatico,
-            'nombre_producto' => $request->nombre, // Lalo manda 'nombre'
-            'precio_venta' => $request->precio,    // Lalo manda 'precio'
-            'stock' => $request->stock,            // Lalo manda 'stock'
+            'nombre_producto' => $request->nombre, 
+            'precio_venta' => $request->precio,    
+            'stock' => $request->stock ?? 1,            
             'tipo_producto' => 'Refacción',
             'created_at' => now(),
             'updated_at' => now(),
@@ -188,10 +201,9 @@ class InventarioController extends Controller
 
     public function inventarioSucursal($tallerId)
     {
-        $productos = \Illuminate\Support\Facades\DB::table('inventario')
-            ->where('taller_id', $tallerId)
+        $productos = DB::table('inventario')
+            ->where('taller_id', $tallerId) // 🔒 CANDADO EN GET
             ->where('stock', '>', 0)
-            // 🐛 CORREGIDO: Tus columnas en BD se llaman id_producto y nombre_producto
             ->select('id_producto as id', 'nombre_producto as nombre', 'stock', 'precio_venta as precio') 
             ->get();
 

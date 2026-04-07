@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\SolicitudMaterialController;
 use App\Http\Controllers\Api\POSController;
 use App\Http\Controllers\Api\ClienteController;
 use App\Http\Controllers\Api\PortalClienteController;
-
+use App\Http\Controllers\ReparacionController as WebReparacionController;
 // =====================================================================
 // 📱 RUTAS EXCLUSIVAS PARA LA APP MÓVIL (REACT NATIVE)
 // =====================================================================
@@ -87,3 +87,9 @@ Route::get('/reparaciones/rastreo/{folio}', [\App\Http\Controllers\Api\PortalCli
 Route::post('/reparaciones/nueva', [\App\Http\Controllers\Api\ReparacionController::class, 'nuevaRecepcion']);
 Route::post('/movil/registro', [\App\Http\Controllers\Api\UsuarioController::class, 'registroMovil']);
 Route::post('/inventario/agregar', [\App\Http\Controllers\Api\InventarioController::class, 'agregarMovil']);
+
+// Obtener detalle rápido para el escáner QR de Ian
+Route::get('/reparaciones/detalle/{id_reparacion}', [WebReparacionController::class, 'obtenerDetalle']);
+
+// Actualizar el estado desde la App
+Route::post('/reparaciones/actualizar-estado', [WebReparacionController::class, 'actualizarEstado']);

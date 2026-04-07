@@ -82,6 +82,7 @@ class ClienteController extends Controller
     }
 
     // 4. Recepción de un equipo (Crea cliente si no existe, luego el equipo y la reparación)
+    // 4. Recepción de un equipo (Crea cliente si no existe, luego el equipo y la reparación)
     public function registrarEquipo(Request $request)
     {
         DB::beginTransaction();
@@ -89,12 +90,23 @@ class ClienteController extends Controller
             // 1. Determinar el ID del cliente
             $id_cliente = $request->id_cliente ?? null;
 
+            // 🔒 NUEVO CANDADO ANTI-HACKERS (Validar propiedad del cliente existente)
+            if ($id_cliente) {
+                $clientePerteneceAlTaller = DB::table('clientes')
+                    ->where('id_cliente', $id_cliente)
+                    ->where('taller_id', $request->taller_id)
+                    ->exists();
+
+                if (!$clientePerteneceAlTaller) {
+                    throw new \Exception('Acceso Denegado: Este cliente no pertenece a tu sucursal.');
+                }
+            }
+
             // Si no viene un ID explícito, significa que es un cliente nuevo (desde los campos de texto)
             if (!$id_cliente && $request->has('cliente')) {
-                // Por seguridad extra, verificamos si el teléfono ya existe en el taller
                 $clienteExistente = DB::table('clientes')
                     ->where('telefono', $request->cliente['telefono'])
-                    ->where('taller_id', $request->taller_id) // 🔒 CANDADO (Ya lo tenías excelente aquí)
+                    ->where('taller_id', $request->taller_id) // 🔒 CANDADO OK
                     ->first();
                 
                 if ($clienteExistente) {
@@ -120,17 +132,17 @@ class ClienteController extends Controller
             // 2. Insertar equipo
             $id_equipo = DB::table('equipos')->insertGetId([
                 'id_cliente' => $id_cliente,
-                'tipo_equipo' => 'Celular', // Fijo como en el script original
+                'tipo_equipo' => 'Celular',
                 'marca' => $request->equipo['marca'],
                 'modelo' => $request->equipo['modelo'],
-                'imei_o_serie' => $request->equipo['imei'] ?? null, // Por si el IMEI viene vacío
+                'imei_o_serie' => $request->equipo['imei'] ?? null,
                 'created_at' => now()
             ]);
 
             // 3. Insertar reparación
             DB::table('reparaciones')->insert([
                 'id_equipo' => $id_equipo,
-                'taller_id' => $request->taller_id,
+                'taller_id' => $request->taller_id, // 🔒 CANDADO OK
                 'problema_reportado' => $request->equipo['descripcion'],
                 'estado' => 'Recibido',
                 'fecha_recepcion' => now()

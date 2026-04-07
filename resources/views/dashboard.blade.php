@@ -321,8 +321,8 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-300 mb-1">Rol</label>
-                                <select name="rol" x-model="editForm.rol" required class="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                                    <option value="recepcionista">Recepcionista (Mostrador)</option>
+                                <select name="rol" required class="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                    <option value="vendedor">Recepcionista (Mostrador)</option>
                                     <option value="tecnico">Técnico (Reparaciones)</option>
                                 </select>
                             </div>
@@ -361,7 +361,7 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-300 mb-1">Rol</label>
                                 <select name="rol" x-model="editForm.rol" required class="w-full px-4 py-2 bg-gray-900 border border-gray-600 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                                    <option value="vendedor">Vendedor (Mostrador)</option>
+                                    <option value="vendedor">Recepcionista (Mostrador)</option>
                                     <option value="tecnico">Técnico (Reparaciones)</option>
                                 </select>
                             </div>

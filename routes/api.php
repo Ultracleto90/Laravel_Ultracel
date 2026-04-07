@@ -93,6 +93,8 @@ Route::post('/movil/registro', [\App\Http\Controllers\Api\UsuarioController::cla
 Route::post('/inventario/agregar', [\App\Http\Controllers\Api\InventarioController::class, 'agregarMovil']);
 Route::get('/inventario/sucursal/{tallerId}', [InventarioController::class, 'inventarioSucursal']);
 Route::post('/inventario/agregarMovil', [InventarioController::class, 'agregarMovil']);
+// POST: Rastrear equipo desde la app del cliente (Folio + PIN)
+Route::post('/movil/rastrear-equipo', [ReparacionController::class, 'rastrearReparacionMovil']);
 
 // Obtener detalle rápido para el escáner QR de Ian
 Route::get('/reparaciones/detalle/{id_reparacion}', [WebReparacionController::class, 'obtenerDetalle']);

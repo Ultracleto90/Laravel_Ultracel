@@ -168,13 +168,21 @@ class ClienteController extends Controller
     }
     
     // 5. Obtener historial de reparaciones de un cliente
+    // 5. Obtener historial de reparaciones de un cliente
     public function historialReparaciones(Request $request)
     {
         $historial = DB::table('reparaciones as r')
             ->join('equipos as e', 'r.id_equipo', '=', 'e.id_equipo')
             ->where('r.taller_id', $request->taller_id) // 🔒 CANDADO DE SEGURIDAD
             ->where('e.id_cliente', $request->id_cliente)
-            ->select('r.id_reparacion', DB::raw("DATE_FORMAT(r.fecha_recepcion, '%Y-%m-%d') as fecha"), DB::raw("CONCAT(e.marca, ' ', e.modelo) AS dispositivo"), 'r.estado', 'r.presupuesto')
+            ->select(
+                'r.id_reparacion', 
+                DB::raw("DATE_FORMAT(r.fecha_recepcion, '%Y-%m-%d') as fecha"), 
+                DB::raw("CONCAT(e.marca, ' ', e.modelo) AS dispositivo"), 
+                'r.estado', 
+                'r.presupuesto',
+                'r.pin_cliente' // 🔑 ¡INYECTAMOS EL PIN PARA LA APP MÓVIL!
+            )
             ->orderBy('r.fecha_recepcion', 'desc')
             ->get();
             

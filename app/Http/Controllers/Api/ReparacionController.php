@@ -145,30 +145,31 @@ class ReparacionController extends Controller
         \Illuminate\Support\Facades\DB::beginTransaction();
         try {
             // Creamos un cliente express (o lo buscas si ya existe en tu lógica completa)
+            // 1. Creamos el cliente express
             $clienteId = \Illuminate\Support\Facades\DB::table('clientes')->insertGetId([
                 'nombre' => $request->cliente,
-                'apellidos' => '', // 🛠️ PARCHE: Le mandamos un string vacío para que MySQL no explote
+                'apellidos' => '', // El parche que pusimos hace rato
                 'telefono' => $request->telefono,
-                'taller_id' => $request->taller_id ?? 1, // Fallback por si no lo manda
+                'taller_id' => $request->taller_id ?? 1, 
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
-            // Creamos el equipo
+            // 2. Creamos el equipo
             $equipoId = \Illuminate\Support\Facades\DB::table('equipos')->insertGetId([
-                'cliente_id' => $clienteId,
+                'id_cliente' => $clienteId, // 🐛 CORREGIDO: id_cliente en lugar de cliente_id
                 'modelo' => $request->modelo,
                 'tipo' => 'Celular', // Por defecto
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
 
-            // Registramos la reparación
+            // 3. Registramos la reparación
             \Illuminate\Support\Facades\DB::table('reparaciones')->insert([
                 'taller_id' => $request->taller_id ?? 1,
-                'equipo_id' => $equipoId,
+                'id_equipo' => $equipoId, // 🐛 CORREGIDO: id_equipo en lugar de equipo_id
                 'estado' => 'recibido',
-                'falla_reportada' => $request->falla,
+                'problema_reportado' => $request->falla, // 🐛 CORREGIDO: Tu nombre de columna original
                 'costo_estimado' => $request->cotizacion,
                 'created_at' => now(),
                 'updated_at' => now()

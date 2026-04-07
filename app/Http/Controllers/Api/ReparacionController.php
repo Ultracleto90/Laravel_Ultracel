@@ -147,6 +147,7 @@ class ReparacionController extends Controller
             // Creamos un cliente express (o lo buscas si ya existe en tu lógica completa)
             $clienteId = \Illuminate\Support\Facades\DB::table('clientes')->insertGetId([
                 'nombre' => $request->cliente,
+                'apellidos' => '', // 🛠️ PARCHE: Le mandamos un string vacío para que MySQL no explote
                 'telefono' => $request->telefono,
                 'taller_id' => $request->taller_id ?? 1, // Fallback por si no lo manda
                 'created_at' => now(),

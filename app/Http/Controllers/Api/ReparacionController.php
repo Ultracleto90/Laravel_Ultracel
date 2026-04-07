@@ -170,4 +170,48 @@ class ReparacionController extends Controller
             return response()->json(['status' => false, 'message' => 'Error al guardar: ' . $e->getMessage()], 500);
         }
     }
+
+    // =========================================================
+    // 📱 APP CLIENTE: RASTREO CON FOLIO Y PIN
+    // =========================================================
+    public function rastrearReparacionMovil(Request $request)
+    {
+        // 1. Lalo nos tiene que mandar el folio y el pin
+        $request->validate([
+            'folio' => 'required|integer',
+            'pin' => 'required|string'
+        ]);
+
+        // 2. Buscamos el match perfecto en la base de datos
+        $reparacion = DB::table('reparaciones')
+            ->join('equipos', 'reparaciones.id_equipo', '=', 'equipos.id_equipo')
+            ->join('talleres', 'reparaciones.taller_id', '=', 'talleres.id')
+            ->where('reparaciones.id_reparacion', $request->folio)
+            ->where('reparaciones.pin_cliente', $request->pin) // 🔒 EL CANDADO DE LALO
+            ->select(
+                'reparaciones.id_reparacion as folio',
+                'reparaciones.estado',
+                'reparaciones.problema_reportado',
+                'reparaciones.diagnostico_tecnico',
+                'reparaciones.presupuesto',
+                'equipos.marca',
+                'equipos.modelo',
+                'talleres.nombre_negocio as sucursal'
+            )
+            ->first();
+
+        // 3. Si alguien intenta adivinar el PIN y falla:
+        if (!$reparacion) {
+            return response()->json([
+                'status' => false, 
+                'message' => 'Folio o PIN incorrectos. Verifica tu ticket de servicio.'
+            ], 404);
+        }
+
+        // 4. Si es correcto, le mandamos a Lalo todos los datos para que arme una pantalla insana
+        return response()->json([
+            'status' => true,
+            'datos' => $reparacion
+        ], 200);
+    }
 }

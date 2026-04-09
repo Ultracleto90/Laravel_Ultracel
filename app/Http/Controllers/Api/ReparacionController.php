@@ -232,4 +232,87 @@ class ReparacionController extends Controller
             'datos' => $reparacion
         ], 200);
     }
+
+    // 📱 EL MOTOR DEL ESCÁNER MÓVIL (Recibiendo datos de Lalo)
+    public function entregarPorQR(Request $request)
+    {
+        // 1. Le pedimos a Lalo que nos mande todo
+        $request->validate([
+            'folio' => 'required',
+            'taller_id' => 'required|integer',
+            'id_vendedor' => 'required|integer' // Necesitamos saber qué vendedor cobró para la gráfica
+        ]);
+
+        // Limpiamos el folio (Si Lalo manda "REP-15", sacamos solo el "15")
+        $id_reparacion = preg_replace('/[^0-9]/', '', $request->folio);
+
+        // Buscamos con el Taller ID que mandó Lalo
+        $reparacion = DB::table('reparaciones')
+            ->where('id_reparacion', $id_reparacion)
+            ->where('taller_id', $request->taller_id) 
+            ->first();
+
+        if (!$reparacion) {
+            return response()->json(['status' => false, 'message' => 'Folio no encontrado en esta sucursal.'], 404);
+        }
+
+        // 🛡️ EL ESCUDO ANTI-CHOQUE
+        if ($reparacion->estado === 'Entregado') {
+            return response()->json(['status' => false, 'message' => 'Este equipo ya fue entregado y cobrado en caja'], 400);
+        }
+
+        if ($reparacion->estado !== 'Reparado') {
+            return response()->json(['status' => false, 'message' => 'El equipo aún no está Listo para entrega. Estado actual: ' . $reparacion->estado], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 3. Pasamos el equipo a Entregado
+            DB::table('reparaciones')
+                ->where('id_reparacion', $id_reparacion)
+                ->update([
+                    'estado' => 'Entregado',
+                    'fecha_entrega_real' => now()
+                ]);
+
+            // 📈 4. EL GATILLO FINANCIERO 
+            $costo_piezas = DB::table('reparacion_piezas')
+                ->join('inventario', 'reparacion_piezas.id_producto', '=', 'inventario.id_producto')
+                ->where('reparacion_piezas.id_reparacion', $id_reparacion)
+                ->sum(DB::raw('reparacion_piezas.cantidad_usada * inventario.precio_compra'));
+
+            $monto_total = $reparacion->presupuesto;
+            $utilidad_neta = $monto_total - $costo_piezas;
+
+            // Creamos el ticket con los datos que mandó Lalo
+            $id_venta = DB::table('ventas')->insertGetId([
+                'taller_id' => $request->taller_id,
+                'id_cliente' => DB::table('equipos')->where('id_equipo', $reparacion->id_equipo)->value('id_cliente'),
+                'id_vendedor' => $request->id_vendedor, 
+                'monto_total' => $monto_total,
+                'utilidad_neta' => $utilidad_neta,
+                'fecha_venta' => now(),
+                'metodo_pago' => 'Efectivo (App Móvil)'
+            ]);
+
+            DB::table('venta_detalles')->insert([
+                'id_venta' => $id_venta,
+                'id_reparacion' => $id_reparacion,
+                'cantidad' => 1,
+                'precio_unitario' => $monto_total,
+                'descripcion_linea' => 'Cobro y Entrega vía Escáner QR (Folio: ' . $id_reparacion . ')'
+            ]);
+
+            DB::commit();
+            
+            return response()->json([
+                'status' => true,
+                'message' => '¡Boom! Equipo entregado y cobrado exitosamente.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['status' => false, 'message' => 'Error interno: ' . $e->getMessage()], 500);
+        }
+    }
 }

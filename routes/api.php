@@ -105,3 +105,4 @@ Route::get('/admin/stats/{taller_id}', [DashboardController::class, 'statsMovil'
 Route::get('/admin/ranking-tecnicos/{taller_id}', [DashboardController::class, 'rankingTecnicos']);
 Route::get('/admin/ventas-semanales/{taller_id}', [DashboardController::class, 'ventasSemanales']);
 Route::get('/admin/inventario-graficas/{taller_id}', [DashboardController::class, 'inventarioGraficas']);
+Route::post('/reparaciones/entregar-qr', [App\Http\Controllers\Api\ReparacionController::class, 'entregarPorQR']);

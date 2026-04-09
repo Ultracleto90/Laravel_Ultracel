@@ -111,4 +111,129 @@ class DashboardController extends Controller
             ]
         ]);
     }
+
+    // =========================================================
+    // 📱 RUTAS EXCLUSIVAS PARA DASHBOARD MÓVIL (LALO)
+    // =========================================================
+
+    // 1. Monitor de Estadísticas Generales
+    public function statsMovil($taller_id)
+    {
+        // Reparaciones activas (que no estén entregadas ni canceladas)
+        $reparaciones = DB::table('reparaciones')
+            ->where('taller_id', $taller_id)
+            ->whereNotIn('estado', ['Entregado', 'Cancelado'])
+            ->count();
+
+        // Ingresos del mes actual
+        $ingresos = DB::table('ventas')
+            ->where('taller_id', $taller_id)
+            ->whereMonth('fecha_venta', Carbon::now()->month)
+            ->sum('monto_total');
+
+        // Empleados activos en la sucursal (suponiendo que todos los usuarios pertenecen al taller)
+        $empleados = DB::table('users')
+            ->where('taller_id', $taller_id)
+            ->count();
+
+        return response()->json([
+            'reparaciones_taller' => $reparaciones,
+            'ingresos_mes' => (float) $ingresos,
+            'empleados_activos' => $empleados
+        ]);
+    }
+
+    // 2. Monitor de Personal (Ranking de Técnicos)
+    public function rankingTecnicos($taller_id)
+    {
+        // Contamos cuántos equipos ha reparado o entregado cada técnico
+        $ranking = DB::table('reparaciones')
+            ->join('users', 'reparaciones.id_tecnico_asignado', '=', 'users.id')
+            ->where('reparaciones.taller_id', $taller_id)
+            ->whereIn('reparaciones.estado', ['Reparado', 'Entregado'])
+            ->select('users.name as nombre', DB::raw('COUNT(reparaciones.id_reparacion) as total'))
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('total')
+            ->get();
+
+        return response()->json($ranking);
+    }
+
+    // 3. Monitor de Ventas Semanales
+    public function ventasSemanales($taller_id)
+    {
+        $ventas = [];
+        
+        // Iteramos los últimos 7 días
+        for ($i = 6; $i >= 0; $i--) {
+            $fecha = Carbon::today()->subDays($i);
+            $nombreDia = ucfirst($fecha->locale('es')->isoFormat('ddd')); // Lun, Mar, Mié
+            
+            $totalDia = DB::table('ventas')
+                ->where('taller_id', $taller_id)
+                ->whereDate('fecha_venta', $fecha)
+                ->sum('monto_total');
+
+            $ventas[] = [
+                'dia' => $nombreDia, 
+                'monto' => (float) $totalDia
+            ];
+        }
+
+        return response()->json($ventas);
+    }
+
+    // 4. Monitor de Inventario
+    public function inventarioGraficas($taller_id)
+    {
+        // A) REFACCIONES
+        $refaccionesBD = DB::table('inventario')
+            ->where('taller_id', $taller_id)
+            ->where('tipo_producto', 'Refacción')
+            ->select('nombre_producto as categoria', DB::raw('SUM(stock) as stock'))
+            ->groupBy('nombre_producto')
+            ->get();
+
+        // B) ACCESORIOS (Venta Directa)
+        $accesoriosBD = DB::table('inventario')
+            ->where('taller_id', $taller_id)
+            ->where('tipo_producto', 'Venta Directa')
+            ->get();
+
+        $todas = [];
+        $porMarca = [];
+
+        // Clasificamos en memoria para darle la estructura exacta a Lalo
+        foreach($accesoriosBD as $acc) {
+            $tipo = $acc->nombre_producto; // Ej: Micas, Fundas
+            $marca = $acc->marca_compatible ?: 'General'; // Si es NULL, lo metemos a General
+
+            // Sumatoria Global ("Todas")
+            if(!isset($todas[$tipo])) $todas[$tipo] = 0;
+            $todas[$tipo] += $acc->stock;
+
+            // Sumatoria por Marca ("Apple", "Samsung", etc.)
+            if(!isset($porMarca[$marca])) $porMarca[$marca] = [];
+            if(!isset($porMarca[$marca][$tipo])) $porMarca[$marca][$tipo] = 0;
+            $porMarca[$marca][$tipo] += $acc->stock;
+        }
+
+        // Formateamos el JSON
+        $accesoriosFormateado = ['Todas' => []];
+        foreach($todas as $tipo => $stock) {
+            $accesoriosFormateado['Todas'][] = ['tipo' => $tipo, 'stock' => (int) $stock];
+        }
+
+        foreach($porMarca as $marca => $tipos) {
+            $accesoriosFormateado[$marca] = [];
+            foreach($tipos as $tipo => $stock) {
+                $accesoriosFormateado[$marca][] = ['tipo' => $tipo, 'stock' => (int) $stock];
+            }
+        }
+
+        return response()->json([
+            'refacciones' => $refaccionesBD,
+            'accesorios' => $accesoriosFormateado
+        ]);
+    }
 }

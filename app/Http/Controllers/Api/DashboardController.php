@@ -94,12 +94,15 @@ class DashboardController extends Controller
         $nombresTop = $topProductos->pluck('nombre_producto')->toArray();
         $cantidadesTop = $topProductos->pluck('total_vendido')->map(function($val) { return (int) $val; })->toArray();
 
+        
+
         // Retornamos el JSON empaquetado exactamente como Python lo necesita
         return response()->json([
             'status' => true,
             'kpis' => [
-                'ventas_hoy' => number_format($ventasHoy, 2, '.', ''),
-                'utilidad_hoy' => number_format($utilidadHoy, 2, '.', ''), // <-- ¡AQUÍ ESTÁ!
+                // 🔥 EL TRUCO: Le ponemos (float) antes de la variable para convertir los null en 0
+                'ventas_hoy' => number_format((float)$ventasHoy, 2, '.', ''),
+                'utilidad_hoy' => number_format((float)$utilidadHoy, 2, '.', ''), 
                 'recibidos_hoy' => $recibidosHoy,
                 'entregados_hoy' => $entregadosHoy
             ],

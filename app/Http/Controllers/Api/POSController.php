@@ -62,18 +62,22 @@ class POSController extends Controller
         ]);
     }
 
-    // 3. ¡El Motor de Ventas! Cobra, descuenta stock y actualiza reparaciones
+    // 3. ¡El Motor de Ventas Matemático!
     public function procesarVenta(Request $request)
     {
         DB::beginTransaction();
         try {
+            // Creamos la venta con utilidad en 0 inicialmente
             $id_venta = DB::table('ventas')->insertGetId([
-                'taller_id' => $request->taller_id, // 🔒 SE REGISTRA CON EL TALLER
+                'taller_id' => $request->taller_id,
                 'id_cliente' => $request->id_cliente != 0 ? $request->id_cliente : null,
                 'id_vendedor' => $request->id_vendedor,
                 'monto_total' => $request->total,
+                'utilidad_neta' => 0, // <-- Inicializamos
                 'fecha_venta' => now()
             ]);
+
+            $utilidad_total_ticket = 0; // Acumulador de ganancia pura
 
             foreach ($request->items as $item) {
                 $esProducto = $item['tipo'] == 'P';
@@ -88,19 +92,39 @@ class POSController extends Controller
                 ]);
 
                 if ($esProducto) {
-                    // 🔒 CANDADO AÑADIDO: Asegura que descuente stock solo si el producto es de SU taller
+                    // 1. VENTA DIRECTA: Buscamos cuánto nos costó comprar este producto
+                    $producto = DB::table('inventario')->where('id_producto', $item['id_item'])->first();
+                    $costo_compra = $producto->precio_compra ?? 0;
+                    
+                    // Utilidad = (Precio al cliente - Costo al taller) * Cantidad
+                    $utilidad_total_ticket += ($item['precio_unitario'] - $costo_compra) * $item['cantidad'];
+
                     DB::table('inventario')
                         ->where('taller_id', $request->taller_id) 
                         ->where('id_producto', $item['id_item'])
                         ->decrement('stock', $item['cantidad']);
                 } else {
-                    // 🔒 CANDADO AÑADIDO: Asegura que marque como entregada solo la reparación de SU taller
+                    // 2. REPARACIÓN: Sumamos el costo de TODAS las piezas usadas en este equipo
+                    $costo_piezas = DB::table('reparacion_piezas')
+                        ->join('inventario', 'reparacion_piezas.id_producto', '=', 'inventario.id_producto')
+                        ->where('reparacion_piezas.id_reparacion', $item['id_item'])
+                        ->sum(DB::raw('reparacion_piezas.cantidad_usada * inventario.precio_compra'));
+                    
+                    // Utilidad = Presupuesto cobrado - Costo de las piezas de refacción
+                    $utilidad_total_ticket += ($item['precio_unitario'] - $costo_piezas);
+
                     DB::table('reparaciones')
                         ->where('taller_id', $request->taller_id)
                         ->where('id_reparacion', $item['id_item'])
                         ->update(['estado' => 'Entregado', 'fecha_entrega_real' => now()]);
                 }
             }
+            
+            // 🔥 MAGIA: Actualizamos la venta con la utilidad exacta calculada
+            DB::table('ventas')
+                ->where('id_venta', $id_venta)
+                ->update(['utilidad_neta' => $utilidad_total_ticket]);
+
             DB::commit();
             return response()->json(['status' => true]);
         } catch (\Exception $e) {

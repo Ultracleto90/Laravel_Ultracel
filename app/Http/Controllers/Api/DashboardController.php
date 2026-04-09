@@ -23,6 +23,11 @@ class DashboardController extends Controller
             ->whereDate('fecha_venta', $hoy)
             ->sum('monto_total');
 
+        $utilidadHoy = DB::table('ventas')
+            ->where('taller_id', $tallerId)
+            ->whereDate('fecha_venta', $hoy)
+            ->sum('utilidad_neta');
+
         $recibidosHoy = DB::table('reparaciones')
             ->where('taller_id', $tallerId)
             ->whereDate('fecha_recepcion', $hoy)
@@ -93,7 +98,8 @@ class DashboardController extends Controller
         return response()->json([
             'status' => true,
             'kpis' => [
-                'ventas_hoy' => number_format($ventasHoy, 2),
+                'ventas_hoy' => number_format($ventasHoy, 2, '.', ''),
+                'utilidad_hoy' => number_format($utilidadHoy, 2, '.', ''), // <-- ¡AQUÍ ESTÁ!
                 'recibidos_hoy' => $recibidosHoy,
                 'entregados_hoy' => $entregadosHoy
             ],

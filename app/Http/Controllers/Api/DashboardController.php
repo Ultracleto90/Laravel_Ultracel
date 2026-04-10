@@ -154,18 +154,21 @@ class DashboardController extends Controller
 
    
     // 2. Monitor de Personal (Ranking de Técnicos)
+    // 2. Monitor de Personal (Ranking de Técnicos)
     public function rankingTecnicos($taller_id)
     {
-        // Empezamos buscando en la tabla de Usuarios primero, para que salgan todos (incluso los que tienen 0)
         $ranking = DB::table('users')
             ->where('users.taller_id', $taller_id)
-            ->where('users.activo', 1) // Opcional: Solo traer empleados que no estén dados de baja
+            ->where('users.activo', 1) 
+            // 🔥 EL ESCUDO: Asegurarnos de que solo traiga a los TÉCNICOS al ranking
+            // (Ajusta 'rol' al nombre real de tu columna si se llama distinto, ej: 'role_id')
+            ->where('users.rol', 'technician') 
             
-            // Usamos LEFT JOIN para que no se borre el usuario si no tiene reparaciones
             ->leftJoin('reparaciones', function($join) {
                 $join->on('users.id', '=', 'reparaciones.id_tecnico_asignado')
                      ->whereIn('reparaciones.estado', ['Reparado', 'Entregado']);
             })
+            // Seleccionamos explícitamente el nombre real
             ->select('users.name as nombre', DB::raw('COUNT(reparaciones.id_reparacion) as total'))
             ->groupBy('users.id', 'users.name')
             ->orderByDesc('total')

@@ -47,6 +47,7 @@ class InventarioController extends Controller
     }
 
     // Obtener el ID de un producto buscando por su SKU
+    // Obtener un producto específico por SKU (¡AHORA DEVUELVE TODO EL OBJETO!)
     public function obtenerIdPorSku(Request $request)
     {
         $request->validate(['taller_id' => 'required|integer', 'sku' => 'required|string']);
@@ -56,9 +57,13 @@ class InventarioController extends Controller
             ->where('taller_id', $request->taller_id) // 🔒 CANDADO
             ->first();
             
-        return response()->json(['status' => true, 'id_producto' => $producto ? $producto->id_producto : null]);
+        return response()->json([
+            'status' => true, 
+            'id_producto' => $producto ? $producto->id_producto : null,
+            // 🔥 EL FIX SUPREMO: Le mandamos todo el objeto a Python para que previsualice
+            'producto' => $producto 
+        ]);
     }
-
     // Guardar o actualizar un producto
     public function guardarProducto(Request $request)
     {

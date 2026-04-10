@@ -154,7 +154,6 @@ class DashboardController extends Controller
 
    
     // 2. Monitor de Personal (Ranking de Técnicos)
-    // 2. Monitor de Personal (Ranking de Técnicos)
     public function rankingTecnicos($taller_id)
     {
         $ranking = DB::table('users')
@@ -162,7 +161,8 @@ class DashboardController extends Controller
             ->where('users.activo', 1) 
             // 🔥 EL ESCUDO: Asegurarnos de que solo traiga a los TÉCNICOS al ranking
             // (Ajusta 'rol' al nombre real de tu columna si se llama distinto, ej: 'role_id')
-            ->where('users.rol', 'technician') 
+            // 🔥 EL FIX: Aceptamos "Tecnico" (Python) y "technician" (Estándar)
+            ->whereIn('users.rol', ['Tecnico', 'technician', 'tecnico']) 
             
             ->leftJoin('reparaciones', function($join) {
                 $join->on('users.id', '=', 'reparaciones.id_tecnico_asignado')

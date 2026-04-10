@@ -32,6 +32,7 @@ class DiagnosticoController extends Controller
         $request->validate([
             'taller_id' => 'required|integer', // 🔒 VALIDACIÓN AÑADIDA
             'id_reparacion' => 'required|integer',
+            'id_tecnico' => 'required|integer',
             'diagnostico' => 'required|string',
             'presupuesto' => 'required|numeric',
             'piezas' => 'required|array'
@@ -57,6 +58,7 @@ class DiagnosticoController extends Controller
                 ->where('id_reparacion', $request->id_reparacion)
                 ->where('taller_id', $request->taller_id) 
                 ->update([
+                    'id_tecnico_asignado' => $request->id_tecnico,
                     'diagnostico_tecnico' => $request->diagnostico,
                     'presupuesto' => $request->presupuesto,
                     'estado' => 'Esperando Aprobación'

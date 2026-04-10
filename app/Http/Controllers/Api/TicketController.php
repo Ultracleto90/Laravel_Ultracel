@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 
 class TicketController extends Controller
 {
@@ -36,9 +38,15 @@ class TicketController extends Controller
             return response()->json(['status' => false, 'message' => 'Reparación no encontrada'], 404);
         }
 
-        // 2. Generamos el PDF usando una vista de HTML (que crearemos en el siguiente paso)
-        $pdf = Pdf::loadView('tickets.recepcion', ['ticket' => $ticketData])
-                  ->setPaper([0, 0, 226.77, 500], 'portrait'); // Tamaño térmico 80mm
+        // 🔥 LA MAGIA DEL QR: Fabricamos el código aquí mismo en Base64
+        $urlRastreo = "https://www.ultracel.lat/rastreo"; // Luego cambias esto por tu link corto de MediaFire
+        $qrBase64 = base64_encode(QrCode::format('svg')->size(100)->margin(0)->generate($urlRastreo));
+
+        // 2. Generamos el PDF inyectando el ticket Y el código QR ($qrBase64)
+        $pdf = Pdf::loadView('tickets.recepcion', [
+            'ticket' => $ticketData,
+            'qrBase64' => $qrBase64 // <-- Le pasamos el QR a la vista HTML
+        ])->setPaper([0, 0, 226.77, 550], 'portrait'); // 🔥 Aumentamos la altura de 500 a 550 para que quepa el cuadro negro
 
         // 3. Lo guardamos en el servidor (Ej: /storage/app/public/tickets/ticket_15.pdf)
         $fileName = 'ticket_' . $ticketData->folio . '.pdf';

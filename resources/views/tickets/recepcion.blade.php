@@ -48,9 +48,12 @@
         <h2>${{ number_format($ticket->presupuesto, 2) }}</h2>
     </div>
 
-    <div class="text-center" style="margin-top: 20px;">
-        <p>Rastrea tu equipo en:</p>
-        <p class="bold">www.ultracel.lat/rastreo</p>
+    <div class="text-center" style="margin-top: 15px;">
+        <p style="margin-bottom: 5px;">Escanea para descargar nuestra App:</p>
+        
+        <img src="data:image/svg+xml;base64,{{ $qrBase64 }}" alt="QR Code" width="100" height="100">
+        
+        <p class="bold" style="margin-top: 5px;">bit.ly/AppUltracel</p>
     </div>
 </body>
 </html>

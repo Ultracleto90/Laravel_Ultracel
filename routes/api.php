@@ -1,9 +1,6 @@
 <?php
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-// ¡ESTA ES LA LÍNEA MÁGICA QUE FALTABA! Le dice a Laravel dónde vive el controlador
 use App\Http\Controllers\Api\AuthController; 
 use App\Http\Controllers\Api\LicenciaController;
 use App\Http\Controllers\Api\UsuarioController;
@@ -81,7 +78,7 @@ Route::post('/clientes/guardar', [ClienteController::class, 'guardarCliente']);
 Route::post('/clientes/eliminar', [ClienteController::class, 'eliminarCliente']);
 Route::post('/clientes/registrar-equipo', [ClienteController::class, 'registrarEquipo']);
 Route::post('/clientes/historial', [ClienteController::class, 'historialReparaciones']);
-
+Route::post('/tickets/recepcion', [\App\Http\Controllers\Api\TicketController::class, 'generarTicketRecepcion']);
 // =====================================================================
 // 📱 RUTAS DE RESCATE PARA EL APK DE LALO
 // =====================================================================

@@ -25,7 +25,7 @@ class TicketController extends Controller
             ->where('r.id_reparacion', $request->id_reparacion)
             ->where('r.taller_id', $request->taller_id)
             ->select(
-                't.nombre_negocio', 't.telefono as taller_telefono',
+                't.nombre_negocio', 
                 'c.nombre as cliente', 'c.telefono as cliente_telefono',
                 'e.marca', 'e.modelo', 'e.tipo_equipo', 'e.imei_o_serie',
                 'r.id_reparacion as folio', 'r.pin_cliente', 'r.problema_reportado', 'r.presupuesto', 'r.fecha_recepcion'
@@ -69,7 +69,7 @@ class TicketController extends Controller
             ->select(
                 'v.id_venta as folio', 'v.fecha_venta', 'v.monto_total',
                 'c.nombre as cliente_nombre', 'c.apellidos as cliente_apellidos',
-                'u.name as vendedor', 't.nombre_negocio', 't.telefono as taller_telefono'
+                'u.name as vendedor', 't.nombre_negocio'
             )->first();
 
         if (!$venta) return response()->json(['status' => false, 'message' => 'Venta no encontrada'], 404);

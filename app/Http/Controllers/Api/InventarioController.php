@@ -142,7 +142,9 @@ class InventarioController extends Controller
             'tipo_producto' => $request->tipo_producto, 
             'marca_compatible' => $request->marca_compatible,
             'stock' => $request->stock,
-            'precio_venta' => $request->precio_venta,
+            // 🔥 EL PARCHE: Atrapamos los dos precios
+            'precio_compra' => $request->precio_compra ?? 0.00,
+            'precio_venta' => $request->precio_venta ?? 0.00,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -163,7 +165,9 @@ class InventarioController extends Controller
                 'tipo_producto' => $request->tipo_producto,
                 'marca_compatible' => $request->marca_compatible,
                 'stock' => $request->stock,
-                'precio_venta' => $request->precio_venta,
+                // 🔥 EL PARCHE: Actualizamos los dos precios
+                'precio_compra' => $request->precio_compra ?? 0.00,
+                'precio_venta' => $request->precio_venta ?? 0.00,
                 'updated_at' => now(),
             ]);
 

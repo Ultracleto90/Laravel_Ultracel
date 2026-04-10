@@ -64,6 +64,7 @@ Route::post('/material/listar', [SolicitudMaterialController::class, 'listar']);
 Route::post('/material/crear', [SolicitudMaterialController::class, 'crear']);
 Route::post('/material/admin-listar', [SolicitudMaterialController::class, 'listarAdmin']);
 Route::post('/material/actualizar-estado', [SolicitudMaterialController::class, 'actualizarEstado']);
+Route::post('/tickets/venta', [\App\Http\Controllers\Api\TicketController::class, 'generarTicketVenta']);
 
 // --- PUNTO DE VENTA (POS) Y CLIENTES ---
 Route::post('/pos/clientes', [POSController::class, 'clientes']);

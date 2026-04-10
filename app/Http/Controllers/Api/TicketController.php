@@ -54,4 +54,41 @@ class TicketController extends Controller
             'url_pdf' => $url
         ]);
     }
+
+    public function generarTicketVenta(Request $request)
+    {
+        $request->validate(['taller_id' => 'required|integer', 'id_venta' => 'required|integer']);
+
+        // 1. Obtener la cabecera de la venta
+        $venta = DB::table('ventas as v')
+            ->leftJoin('clientes as c', 'v.id_cliente', '=', 'c.id_cliente')
+            ->join('users as u', 'v.id_vendedor', '=', 'u.id')
+            ->join('talleres as t', 'v.taller_id', '=', 't.id')
+            ->where('v.id_venta', $request->id_venta)
+            ->where('v.taller_id', $request->taller_id)
+            ->select(
+                'v.id_venta as folio', 'v.fecha_venta', 'v.monto_total',
+                'c.nombre as cliente_nombre', 'c.apellidos as cliente_apellidos',
+                'u.name as vendedor', 't.nombre_negocio', 't.telefono as taller_telefono'
+            )->first();
+
+        if (!$venta) return response()->json(['status' => false, 'message' => 'Venta no encontrada'], 404);
+
+        // 2. Obtener los productos/reparaciones cobradas
+        $detalles = DB::table('venta_detalles')
+            ->where('id_venta', $request->id_venta)
+            ->select('cantidad', 'descripcion_linea as descripcion', 'precio_unitario')
+            ->get();
+
+        // 3. Generar PDF (El tamaño de papel es dinámico según los items para miniprinter térmica)
+        $altura_dinamica = 300 + (count($detalles) * 20); 
+        $pdf = Pdf::loadView('tickets.venta', ['venta' => $venta, 'detalles' => $detalles])
+                  ->setPaper([0, 0, 226.77, $altura_dinamica], 'portrait');
+
+        $fileName = 'venta_' . $venta->folio . '.pdf';
+        $path = 'public/tickets/' . $fileName;
+        Storage::put($path, $pdf->output());
+
+        return response()->json(['status' => true, 'url_pdf' => asset('storage/tickets/' . $fileName)]);
+    }
 }

@@ -126,7 +126,8 @@ class POSController extends Controller
                 ->update(['utilidad_neta' => $utilidad_total_ticket]);
 
             DB::commit();
-            return response()->json(['status' => true]);
+            // 🔥 EL FIX: Ahora le "soplamos" a Python qué ID de venta acabamos de crear
+            return response()->json(['status' => true, 'id_venta' => $id_venta]);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);

@@ -39,7 +39,7 @@ class TicketController extends Controller
         }
 
         // 🔥 LA MAGIA DEL QR: Fabricamos el código aquí mismo en Base64
-        $urlRastreo = "https://www.ultracel.lat/rastreo"; // Luego cambias esto por tu link corto de MediaFire
+        $urlRastreo = "https://www.mediafire.com/file/wnk9psfxp0ofo82/Ultracel.apk/file"; // Luego cambias esto por tu link corto de MediaFire
         $qrBase64 = base64_encode(QrCode::format('svg')->size(100)->margin(0)->generate($urlRastreo));
 
         // 2. Generamos el PDF inyectando el ticket Y el código QR ($qrBase64)
